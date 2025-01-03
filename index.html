@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index of Indexes Search</title>
+    <link rel="icon" href="QARA.png" type="image/png">
+
+    <!-- Include Select2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Main CSS for the table -->
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            width: 100vw; 
+            height: 100vh; 
+        }
+       
+        .banner {
+        display: flex; /* Enables Flexbox layout */
+        align-items: center; /* Vertically centers content */
+        justify-content: left; /* Aligns content to the left */
+        background-color: white;
+    	padding: 0;
+    	font-size: 24px;
+    	font-weight: bold;
+    	color: red;
+    	margin: 0 auto 20px;
+    	width: 30%; /* Adjust as needed */
+    	height: 60px; /* Sets a fixed height */
+	}
+
+	.banner img {
+   	 height: 100%; /* Makes the flag match the banner's height */
+    	margin-right: 10px; /* Adds space between the flag and text */
+	}
+
+        .banner-text {
+        flex-grow: 1; /* Ensures text takes up remaining space */
+        text-align: center; /* Horizontally centers the text */
+        }
+        
+	.container {
+        padding: 0px;
+        margin: 10px;
+        text-align: center;
+        }
+    
+        .table-container {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            table-layout: fixed; /* Force columns to fit within available space */
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+	    white-space: nowrap;
+            overflow:hidden;   
+        }
+
+        tr:nth-child(even) {
+            background-color: #e6f2ff;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+
+        /* Set specific column widths */
+        th:nth-child(1), td:nth-child(1) { /* Bing/CoPilot column */
+            width:6%; /* Bing/CoPilot gets 10% width */
+        }
+        th:nth-child(2), td:nth-child(2) { /* Date column */
+            width: auto; /* Dynamic width based on content */
+        }
+        th:nth-child(3), td:nth-child(3) { /* Agency column */
+            width: 15%; /* Agency gets 20% width */
+        }
+        th:nth-child(4), td:nth-child(4) { /* Category column */
+            width: 8%; /* Category gets 10% width */
+        }
+        th:nth-child(5), td:nth-child(5) { /* Title column */
+            width: auto; /* Title takes the remaining space */
+        }
+
+        /* Set dropdown widths to match column width */
+        .filter-select, #searchInput, .select2-container {
+            width: 100%; /* Ensure the dropdown matches the column width */
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        /* Reduce font size inside dropdown options */
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            font-size: 12px;
+        }
+
+        .select2-dropdown .select2-results__options {
+            font-size: 12px;
+        }
+
+        /* Title wraps to two lines */
+        td:nth-child(5) {
+            white-space: normal;
+            line-height: 1.2em;
+        }
+
+        .main-title span {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 0px;
+            color: #FBBB6A;
+        }
+
+        .main-title span.blue {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 0px;
+            color: #0778AB;
+        }
+     
+
+     h1 {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 0px;
+        }
+
+        /* Media Query for smaller screens */
+        @media screen and (max-width: 600px) {
+            th, td {
+                font-size: 12px;
+                padding: 8px;
+            }
+
+            .filter-select, #searchInput, .select2-selection {
+                font-size: 12px;
+            }
+
+            /* Ensure the table takes up full width on mobile devices */
+            table {
+                width: 100%;
+            }
+
+            /* Ensure dropdown boxes remain column width */
+            th:nth-child(1), td:nth-child(1), #dateFilter, /* Bing/CoPilot */
+            th:nth-child(2), td:nth-child(2), #agencyFilter, /* Date */
+            th:nth-child(3), td:nth-child(3), #categoryFilter, /* Agency */
+            th:nth-child(4), td:nth-child(4), #searchInput { /* Category */
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+        }
+    </style>
+
+    <!-- Include jQuery and Select2 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "pk31qg16qb");
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-81366NTXDQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-81366NTXDQ');
+</script>
+</head>
+<script>
+    if (screen.orientation && screen.orientation.lock) { 
+        screen.orientation.lock('landscape'); } 
+        else { alert('Your browser does not support locking screen orientation.'); 
+        }
+</script>
+
+<body style="background-color: black;">
+
+<div class="container">
+	<div class="banner">
+    	<img src="Swissflag.png" alt="Swiss Flag">
+    	<div class="banner-text">REGULATORY ROUNDUP</div>
+	</div>
+        <div class="main-title"><span>MedTech </span><span class="blue">Leading</span> <span>Voice</span></div>
+        <h1 style="color: white;">Regulatory Roundup Index Search</h1>   
+    </div>
+
+    <div class="table-container">
+        <table id="csvTable">
+            <thead>
+                <tr>
+                    <th>Ask AI Bing/CoPilot</th>
+                    <th id="dateColumn">
+                        Date
+                        <div class="filter-container">
+                            <select id="dateFilter" class="filter-select" onchange="filterTable()">
+                                <option value="">Select Date</option>
+                            </select>
+                        </div>
+                    </th>
+                    <th>
+                        Agency
+                        <div class="filter-container">
+                            <select id="agencyFilter" class="filter-select" onchange="filterTable()">
+                                <option value="">Select Agency</option>
+                            </select>
+                        </div>
+                    </th>
+                    <th>
+                        Category
+                        <div class="filter-container">
+                            <select id="categoryFilter" class="filter-select" onchange="filterTable()">
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                    </th>
+                    <th>
+                        Title
+                        <div class="filter-container">
+                            <input type="text" id="searchInput" class="filter-select" onkeyup="filterTable()" placeholder="Keyword Search Title..">
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Include PapaParse CDN for parsing CSV -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+<script>
+    let tableData = []; // Store the parsed data for filtering
+    let dateURLMapping = {}; // Mapping for Date to URL from URL.csv
+    let longestDateLength = 0; // To store the longest date length
+
+    
+    function loadCSVFiles() {
+            fetch('https://martincking.github.io/Index-of-Indexes/URL.csv')
+            .then(response => response.text())
+            .then(data => {
+                Papa.parse(data, {
+                    complete: function(results) {
+                        results.data.forEach(row => {
+                            const date = row[0];
+                            const url = row[1];
+
+                            if (date && url) {
+                                dateURLMapping[date] = url;
+                            } else {
+                                console.warn(`Missing date or URL: ${date}, ${url}`);
+                            }
+                        });
+                        console.log(dateURLMapping); // Debugging output to check URL mapping
+                    },
+                    skipEmptyLines: true
+                });
+            })
+            .catch(error => console.error('Error loading URL.csv:', error));
+        
+        fetch('https://martincking.github.io/Index-of-Indexes/Index of Indexes.csv')
+            .then(response => response.text())
+            .then(data => {
+                Papa.parse(data, {
+                    complete: function(results) {
+                        tableData = results.data.slice(1).map(row => row.slice(0, 4)); // Slice to get first 4 columns
+                        renderTable(tableData);
+                        populateFilters(tableData);
+                        adjustDateColumnWidth(tableData);
+                    },
+                    skipEmptyLines: true
+                });
+            })
+            .catch(error => console.error('Error loading Index of Indexes.csv:', error));
+    }
+
+    window.onload = function() {
+        loadCSVFiles();
+    };
+
+    function askCoPilot(agency, category, title) {
+        const query = `${agency} ${category} ${title}`;
+        const encodedQuery = encodeURIComponent(query);
+        const copilotLink = `https://www.bing.com/search?q=${encodedQuery}`;
+
+        navigator.clipboard.writeText(query).then(() => {
+            window.open(copilotLink, '_blank');
+        }).catch(err => console.error('Could not copy text to clipboard:', err));
+    }
+
+    function renderTable(data) {
+        const tableBody = document.getElementById('tableBody');
+        tableBody.innerHTML = data.map((row) => {
+            const date = row[0];
+            const agency = row[1];
+            const category = row[2];
+            const title = row[3];
+            const dateLink = dateURLMapping[date] || '#'; // Get URL for the date, or fallback to '#'
+            
+            return `<tr>
+                <td><button onclick="askCoPilot('${agency}', '${category}', '${title}')">Bing/CoPilot</button></td>
+                <td><a href="${dateLink}" target="_blank">${date}</a></td>
+                ${row.slice(1).map(cell => `<td>${cell}</td>`).join('')}
+            </tr>`;
+        }).join('');
+    }
+
+    // Sorting agencies and categories alphabetically and populating filters
+    function populateFilters(data) {
+        const dateFilter = document.getElementById('dateFilter');
+        const agencyFilter = document.getElementById('agencyFilter');
+        const categoryFilter = document.getElementById('categoryFilter');
+
+        let dates = new Set();
+        let agencies = new Set();
+        let categories = new Set();
+
+        data.forEach(row => {
+            const date = row[0];
+            const agency = row[1];
+            const category = row[2];
+
+            dates.add(date);
+            agencies.add(agency);
+            categories.add(category);
+
+            // Check if this date is the longest
+            if (date.length > longestDateLength) {
+                longestDateLength = date.length;
+            }
+        });
+
+        populateDropdown(dateFilter, Array.from(dates));
+
+        // Sort agencies and categories alphabetically before populating the dropdowns
+        populateDropdown(agencyFilter, Array.from(agencies).sort());
+        populateDropdown(categoryFilter, Array.from(categories).sort());
+    }
+
+    function populateDropdown(dropdown, items) {
+        dropdown.innerHTML = '<option value="">Select ' + dropdown.id.replace('Filter', '') + '</option>' +
+            items.map(item => `<option value="${item}">${item}</option>`).join('');
+
+        // Set width specifically for the Date dropdown based on longest date length
+        const dropdownWidth = dropdown.id === 'dateFilter' ? `${longestDateLength * 10}px` : dropdown.id === 'agencyFilter' ? '15%' : dropdown.id === 'categoryFilter' ? '10%' : 'resolve';
+
+        // Initialize Select2 without wrapping text and using appropriate width
+        $(`#${dropdown.id}`).select2({
+            placeholder: 'Select ' + dropdown.id.replace('Filter', ''),
+            allowClear: true,
+            width: '100%' // Ensure dropdown matches column width
+        });
+    }
+
+    // Adjust the Date column width based on the longest date
+    function adjustDateColumnWidth(data) {
+        const dateColumn = document.getElementById('dateColumn');
+        const longestDate = data.reduce((max, row) => row[0].length > max.length ? row[0] : max, "");
+        const dateColumnWidth = longestDate.length * 10; // Approximate width based on character length
+        dateColumn.style.width = `${dateColumnWidth}px`;
+    }
+
+    function filterTable() {
+        const dateFilter = document.getElementById('dateFilter').value.toUpperCase();
+        const agencyFilter = document.getElementById('agencyFilter').value.toUpperCase();
+        const categoryFilter = document.getElementById('categoryFilter').value.toUpperCase();
+        const searchInput = document.getElementById('searchInput').value.toUpperCase();
+
+        const filteredData = tableData.filter(row => {
+            const date = row[0].toUpperCase();
+            const agency = row[1].toUpperCase();
+            const category = row[2].toUpperCase();
+            const title = row[3].toUpperCase();
+
+            const matchesDate = !dateFilter || date === dateFilter;
+            const matchesAgency = !agencyFilter || agency === agencyFilter;
+            const matchesCategory = !categoryFilter || category === categoryFilter;
+            const matchesTitle = !searchInput || title.includes(searchInput);
+
+            return matchesDate && matchesAgency && matchesCategory && matchesTitle;
+        });
+
+        renderTable(filteredData);
+    }
+</script>
+
+</body>
+</html>
