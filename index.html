@@ -329,9 +329,10 @@
         </tr>`;
     }).join('');
 
-    // Update the entry count
+    // Update the entry count with a thousands separator
     const entryCount = data.length;
-    document.getElementById('entryCount').textContent = `(${entryCount} entries)`;
+    const formattedCount = new Intl.NumberFormat('en-US').format(entryCount);
+    document.getElementById('entryCount').textContent = `(${formattedCount} entries)`;
 }
 
 
