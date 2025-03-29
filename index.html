@@ -140,6 +140,7 @@
             margin-top: 0px;
         }
 
+
         /* Media Query for smaller screens */
         @media screen and (max-width: 600px) {
             th, td {
@@ -205,7 +206,7 @@
     	<div class="banner-text">REGULATORY ROUNDUP</div>
 	</div>
         <div class="main-title"><span>MedTech </span><span class="blue">Leading</span> <span>Voice</span></div>
-        <h1 style="color: white;">Regulatory Roundup Index Search</h1>   
+        <h1 style="color: white;">Regulatory Roundup Index Search <span id="entryCount"></span></h1>
     </div>
 
     <div class="table-container">
@@ -313,21 +314,26 @@
     }
 
     function renderTable(data) {
-        const tableBody = document.getElementById('tableBody');
-        tableBody.innerHTML = data.map((row) => {
-            const date = row[0];
-            const agency = row[1];
-            const category = row[2];
-            const title = row[3];
-            const dateLink = dateURLMapping[date] || '#'; // Get URL for the date, or fallback to '#'
-            
-            return `<tr>
-                <td><button onclick="askCoPilot('${agency}', '${category}', '${title}')">Bing/CoPilot</button></td>
-                <td><a href="${dateLink}" target="_blank">${date}</a></td>
-                ${row.slice(1).map(cell => `<td>${cell}</td>`).join('')}
-            </tr>`;
-        }).join('');
-    }
+    const tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = data.map((row) => {
+        const date = row[0];
+        const agency = row[1];
+        const category = row[2];
+        const title = row[3];
+        const dateLink = dateURLMapping[date] || '#'; // Get URL for the date, or fallback to '#'
+
+        return `<tr>
+            <td><button onclick="askCoPilot('${agency}', '${category}', '${title}')">Bing/CoPilot</button></td>
+            <td><a href="${dateLink}" target="_blank">${date}</a></td>
+            ${row.slice(1).map(cell => `<td>${cell}</td>`).join('')}
+        </tr>`;
+    }).join('');
+
+    // Update the entry count
+    const entryCount = data.length;
+    document.getElementById('entryCount').textContent = `(${entryCount} entries)`;
+}
+
 
     // Sorting agencies and categories alphabetically and populating filters
     function populateFilters(data) {
