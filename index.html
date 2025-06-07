@@ -288,7 +288,7 @@
             .then(data => {
                 Papa.parse(data, {
                     complete: function(results) {
-                        tableData = results.data.slice(1).map(row => row.slice(0, 4)); // Slice to get first 4 columns
+                        tableData = results.data.slice(1).map(row => row.slice(0, )); // Slice to get first 4 columns
                         renderTable(tableData);
                         populateFilters(tableData);
                         adjustDateColumnWidth(tableData);
@@ -320,13 +320,14 @@
         const agency = row[1];
         const category = row[2];
         const title = row[3];
-        const dateLink = dateURLMapping[date] || '#'; // Get URL for the date, or fallback to '#'
-
-        return `<tr>
-            <td><button onclick="askCoPilot('${agency}', '${category}', '${title}')">Bing/CoPilot</button></td>
-            <td><a href="${dateLink}" target="_blank">${date}</a></td>
-            ${row.slice(1).map(cell => `<td>${cell}</td>`).join('')}
-        </tr>`;
+	const embeddedLink = row.length > 4 && row[4].startsWith('http') ? row[4] : null;
+	const dateLink = embeddedLink || dateURLMapping[date] || '#';
+        
+	return `<tr>
+    		<td><button onclick="askCoPilot('${agency}', '${category}', '${title}')">Bing/CoPilot</button></td>
+    		<td><a href="${dateLink}" target="_blank">${date}</a></td>
+    		${row.slice(1, 4).map(cell => `<td>${cell}</td>`).join('')}
+	</tr>`;
     }).join('');
 
     // Update the entry count with a thousands separator
