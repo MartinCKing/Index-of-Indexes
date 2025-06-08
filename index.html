@@ -313,29 +313,34 @@
         }).catch(err => console.error('Could not copy text to clipboard:', err));
     }
 
-    function renderTable(data) {
+
+function renderTable(data) {
     const tableBody = document.getElementById('tableBody');
     tableBody.innerHTML = data.map((row) => {
         const date = row[0];
         const agency = row[1];
         const category = row[2];
         const title = row[3];
-	const embeddedLink = row.length > 4 && row[4].startsWith('http') ? row[4] : null;
-	const dateLink = embeddedLink || dateURLMapping[date] || '#';
-        
-	return `<tr>
-    		<td><button onclick="askCoPilot('${agency}', '${category}', '${title}')">Bing/CoPilot</button></td>
-    		<td><a href="${dateLink}" target="_blank">${date}</a></td>
-    		${row.slice(1, 4).map(cell => `<td>${cell}</td>`).join('')}
-	</tr>`;
+
+        // Use column 5 (index 4) for title hyperlink if it's a valid http link
+        const titleLink = row[4] && row[4].startsWith('http') ? row[4] : null;
+
+        // Use URL.csv for date hyperlink
+        const dateLink = dateURLMapping[date];
+
+        return `<tr>
+            <td><button onclick="askCoPilot('${agency}', '${category}', '${title}')">Bing/CoPilot</button></td>
+            <td>${dateLink ? `<a href="${dateLink}" target="_blank">${date}</a>` : date}</td>
+            <td>${agency}</td>
+            <td>${category}</td>
+            <td>${titleLink ? `<a href="${titleLink}" target="_blank">${title}</a>` : title}</td>
+        </tr>`;
     }).join('');
 
-    // Update the entry count with a thousands separator
     const entryCount = data.length;
     const formattedCount = new Intl.NumberFormat('en-US').format(entryCount);
     document.getElementById('entryCount').textContent = `(${formattedCount} entries)`;
 }
-
 
     // Sorting agencies and categories alphabetically and populating filters
     function populateFilters(data) {
