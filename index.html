@@ -255,13 +255,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
 <script>
-    let tableData = []; // Store the parsed data for filtering
-    let dateURLMapping = {}; // Mapping for Date to URL from URL.csv
-    let longestDateLength = 0; // To store the longest date length
+    let tableData = []; // Store parsed data for filtering
+    let dateURLMapping = {}; // Date-to-URL mapping
+    let longestDateLength = 0;
 
-    
     function loadCSVFiles() {
-            fetch('https://martincking.github.io/Index-of-Indexes/URL.csv')
+        // Step 1: Load URL.csv
+        fetch('https://martincking.github.io/Index-of-Indexes/URL.csv')
             .then(response => response.text())
             .then(data => {
                 Papa.parse(data, {
@@ -269,34 +269,31 @@
                         results.data.forEach(row => {
                             const date = row[0];
                             const url = row[1];
-
                             if (date && url) {
                                 dateURLMapping[date] = url;
-                            } else {
-                                console.warn(`Missing date or URL: ${date}, ${url}`);
                             }
                         });
-                        console.log(dateURLMapping); // Debugging output to check URL mapping
+
+                        // Step 2: Load Index of Indexes.csv
+                        fetch('https://martincking.github.io/Index-of-Indexes/Index of Indexes.csv')
+                            .then(response => response.text())
+                            .then(data => {
+                                Papa.parse(data, {
+                                    complete: function(results) {
+                                        tableData = results.data.slice(1); // all rows, including column 5 for title links
+                                        renderTable(tableData);
+                                        populateFilters(tableData);
+                                        adjustDateColumnWidth(tableData);
+                                    },
+                                    skipEmptyLines: true
+                                });
+                            })
+                            .catch(error => console.error('Error loading Index of Indexes.csv:', error));
                     },
                     skipEmptyLines: true
                 });
             })
             .catch(error => console.error('Error loading URL.csv:', error));
-        
-        fetch('https://martincking.github.io/Index-of-Indexes/Index of Indexes.csv')
-            .then(response => response.text())
-            .then(data => {
-                Papa.parse(data, {
-                    complete: function(results) {
-                        tableData = results.data.slice(1).map(row => row.slice(0, )); // Slice to get first 4 columns
-                        renderTable(tableData);
-                        populateFilters(tableData);
-                        adjustDateColumnWidth(tableData);
-                    },
-                    skipEmptyLines: true
-                });
-            })
-            .catch(error => console.error('Error loading Index of Indexes.csv:', error));
     }
 
     window.onload = function() {
@@ -313,36 +310,30 @@
         }).catch(err => console.error('Could not copy text to clipboard:', err));
     }
 
+    function renderTable(data) {
+        const tableBody = document.getElementById('tableBody');
+        tableBody.innerHTML = data.map((row) => {
+            const date = row[0];
+            const agency = row[1];
+            const category = row[2];
+            const title = row[3];
+            const titleLink = row[4] && row[4].startsWith('http') ? row[4] : null;
+            const dateLink = dateURLMapping[date];
 
-function renderTable(data) {
-    const tableBody = document.getElementById('tableBody');
-    tableBody.innerHTML = data.map((row) => {
-        const date = row[0];
-        const agency = row[1];
-        const category = row[2];
-        const title = row[3];
+            return `<tr>
+                <td><button onclick="askCoPilot('${agency}', '${category}', '${title}')">Bing/CoPilot</button></td>
+                <td>${dateLink ? `<a href="${dateLink}" target="_blank">${date}</a>` : date}</td>
+                <td>${agency}</td>
+                <td>${category}</td>
+                <td>${titleLink ? `<a href="${titleLink}" target="_blank">${title}</a>` : title}</td>
+            </tr>`;
+        }).join('');
 
-        // Use column 5 (index 4) for title hyperlink if it's a valid http link
-        const titleLink = row[4] && row[4].startsWith('http') ? row[4] : null;
+        const entryCount = data.length;
+        const formattedCount = new Intl.NumberFormat('en-US').format(entryCount);
+        document.getElementById('entryCount').textContent = `(${formattedCount} entries)`;
+    }
 
-        // Use URL.csv for date hyperlink
-        const dateLink = dateURLMapping[date];
-
-        return `<tr>
-            <td><button onclick="askCoPilot('${agency}', '${category}', '${title}')">Bing/CoPilot</button></td>
-            <td>${dateLink ? `<a href="${dateLink}" target="_blank">${date}</a>` : date}</td>
-            <td>${agency}</td>
-            <td>${category}</td>
-            <td>${titleLink ? `<a href="${titleLink}" target="_blank">${title}</a>` : title}</td>
-        </tr>`;
-    }).join('');
-
-    const entryCount = data.length;
-    const formattedCount = new Intl.NumberFormat('en-US').format(entryCount);
-    document.getElementById('entryCount').textContent = `(${formattedCount} entries)`;
-}
-
-    // Sorting agencies and categories alphabetically and populating filters
     function populateFilters(data) {
         const dateFilter = document.getElementById('dateFilter');
         const agencyFilter = document.getElementById('agencyFilter');
@@ -361,15 +352,12 @@ function renderTable(data) {
             agencies.add(agency);
             categories.add(category);
 
-            // Check if this date is the longest
             if (date.length > longestDateLength) {
                 longestDateLength = date.length;
             }
         });
 
         populateDropdown(dateFilter, Array.from(dates));
-
-        // Sort agencies and categories alphabetically before populating the dropdowns
         populateDropdown(agencyFilter, Array.from(agencies).sort());
         populateDropdown(categoryFilter, Array.from(categories).sort());
     }
@@ -378,22 +366,17 @@ function renderTable(data) {
         dropdown.innerHTML = '<option value="">Select ' + dropdown.id.replace('Filter', '') + '</option>' +
             items.map(item => `<option value="${item}">${item}</option>`).join('');
 
-        // Set width specifically for the Date dropdown based on longest date length
-        const dropdownWidth = dropdown.id === 'dateFilter' ? `${longestDateLength * 10}px` : dropdown.id === 'agencyFilter' ? '15%' : dropdown.id === 'categoryFilter' ? '10%' : 'resolve';
-
-        // Initialize Select2 without wrapping text and using appropriate width
         $(`#${dropdown.id}`).select2({
             placeholder: 'Select ' + dropdown.id.replace('Filter', ''),
             allowClear: true,
-            width: '100%' // Ensure dropdown matches column width
+            width: '100%'
         });
     }
 
-    // Adjust the Date column width based on the longest date
     function adjustDateColumnWidth(data) {
         const dateColumn = document.getElementById('dateColumn');
         const longestDate = data.reduce((max, row) => row[0].length > max.length ? row[0] : max, "");
-        const dateColumnWidth = longestDate.length * 10; // Approximate width based on character length
+        const dateColumnWidth = longestDate.length * 10;
         dateColumn.style.width = `${dateColumnWidth}px`;
     }
 
@@ -404,17 +387,15 @@ function renderTable(data) {
         const searchInput = document.getElementById('searchInput').value.toUpperCase();
 
         const filteredData = tableData.filter(row => {
-            const date = row[0].toUpperCase();
-            const agency = row[1].toUpperCase();
-            const category = row[2].toUpperCase();
-            const title = row[3].toUpperCase();
+            const date = row[0]?.toUpperCase() || '';
+            const agency = row[1]?.toUpperCase() || '';
+            const category = row[2]?.toUpperCase() || '';
+            const title = row[3]?.toUpperCase() || '';
 
-            const matchesDate = !dateFilter || date === dateFilter;
-            const matchesAgency = !agencyFilter || agency === agencyFilter;
-            const matchesCategory = !categoryFilter || category === categoryFilter;
-            const matchesTitle = !searchInput || title.includes(searchInput);
-
-            return matchesDate && matchesAgency && matchesCategory && matchesTitle;
+            return (!dateFilter || date === dateFilter) &&
+                   (!agencyFilter || agency === agencyFilter) &&
+                   (!categoryFilter || category === categoryFilter) &&
+                   (!searchInput || title.includes(searchInput));
         });
 
         renderTable(filteredData);
