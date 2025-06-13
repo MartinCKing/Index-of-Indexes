@@ -259,8 +259,18 @@
     let dateURLMapping = {}; // Date-to-URL mapping
     let longestDateLength = 0;
 
+    function getQueryParams() {
+        const params = {};
+        const queryString = window.location.search.substring(1);
+        const pairs = queryString.split("&");
+        for (let pair of pairs) {
+            const [key, value] = pair.split("=");
+            params[decodeURIComponent(key)] = decodeURIComponent(value || "");
+        }
+        return params;
+    }
+
     function loadCSVFiles() {
-        // Step 1: Load URL.csv
         fetch('https://martincking.github.io/Index-of-Indexes/URL.csv')
             .then(response => response.text())
             .then(data => {
@@ -274,16 +284,16 @@
                             }
                         });
 
-                        // Step 2: Load Index of Indexes.csv
                         fetch('https://martincking.github.io/Index-of-Indexes/Index of Indexes.csv')
                             .then(response => response.text())
                             .then(data => {
                                 Papa.parse(data, {
                                     complete: function(results) {
-                                        tableData = results.data.slice(1); // all rows, including column 5 for title links
+                                        tableData = results.data.slice(1);
                                         renderTable(tableData);
                                         populateFilters(tableData);
                                         adjustDateColumnWidth(tableData);
+                                        applyURLFilters(); // Trigger URL filters after load
                                     },
                                     skipEmptyLines: true
                                 });
@@ -296,7 +306,32 @@
             .catch(error => console.error('Error loading URL.csv:', error));
     }
 
-    window.onload = function() {
+    function applyURLFilters() {
+        const params = getQueryParams();
+
+        if (params.date) {
+            document.getElementById("dateFilter").value = params.date;
+            $('#dateFilter').trigger('change');
+        }
+        if (params.agency) {
+            document.getElementById("agencyFilter").value = params.agency;
+            $('#agencyFilter').trigger('change');
+        }
+        if (params.category) {
+            document.getElementById("categoryFilter").value = params.category;
+            $('#categoryFilter').trigger('change');
+        }
+
+        // Accept either "title" or fallback to "search"
+        const titleValue = params.title || params.search;
+        if (titleValue) {
+            document.getElementById("searchInput").value = titleValue;
+        }
+
+        filterTable();
+    }
+
+    window.onload = function () {
         loadCSVFiles();
     };
 
@@ -384,7 +419,7 @@
         const dateFilter = document.getElementById('dateFilter').value.toUpperCase();
         const agencyFilter = document.getElementById('agencyFilter').value.toUpperCase();
         const categoryFilter = document.getElementById('categoryFilter').value.toUpperCase();
-        const searchInput = document.getElementById('searchInput').value.toUpperCase();
+        const titleSearch = document.getElementById('searchInput').value.toUpperCase();
 
         const filteredData = tableData.filter(row => {
             const date = row[0]?.toUpperCase() || '';
@@ -395,12 +430,13 @@
             return (!dateFilter || date === dateFilter) &&
                    (!agencyFilter || agency === agencyFilter) &&
                    (!categoryFilter || category === categoryFilter) &&
-                   (!searchInput || title.includes(searchInput));
+                   (!titleSearch || title.includes(titleSearch));
         });
 
         renderTable(filteredData);
     }
 </script>
+
 
 </body>
 </html>
