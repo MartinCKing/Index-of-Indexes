@@ -254,9 +254,12 @@
 <!-- Include PapaParse CDN for parsing CSV -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
+<!-- Include PapaParse CDN for parsing CSV -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
 <script>
-    let tableData = []; // Store parsed data for filtering
-    let dateURLMapping = {}; // Date-to-URL mapping
+    let tableData = [];
+    let dateURLMapping = {};
     let longestDateLength = 0;
 
     function getQueryParams() {
@@ -293,9 +296,20 @@
                                         renderTable(tableData);
                                         populateFilters(tableData);
                                         adjustDateColumnWidth(tableData);
-                                        setTimeout(() => {
-    					applyURLFilters();
-					}, 500);  // allow time for dropdowns to initialize
+
+                                        // Wait for Select2 to initialize before applying filters
+                                        const waitForSelect2 = () => {
+                                            if (
+                                                $('#dateFilter').hasClass("select2-hidden-accessible") &&
+                                                $('#agencyFilter').hasClass("select2-hidden-accessible") &&
+                                                $('#categoryFilter').hasClass("select2-hidden-accessible")
+                                            ) {
+                                                applyURLFilters();
+                                            } else {
+                                                setTimeout(waitForSelect2, 100);
+                                            }
+                                        };
+                                        waitForSelect2();
                                     },
                                     skipEmptyLines: true
                                 });
@@ -312,19 +326,33 @@
         const params = getQueryParams();
 
         if (params.date) {
-            document.getElementById("dateFilter").value = params.date;
+            let normalizedDate = params.date;
+
+            // Convert YYYY-MM-DD → D. Month YYYY
+            if (/^\d{4}-\d{2}-\d{2}$/.test(params.date)) {
+                const [year, month, day] = params.date.split("-");
+                const months = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ];
+                const monthName = months[parseInt(month) - 1];
+                normalizedDate = `${parseInt(day)}. ${monthName} ${year}`;
+            }
+
+            document.getElementById("dateFilter").value = normalizedDate;
             $('#dateFilter').trigger('change');
         }
+
         if (params.agency) {
             document.getElementById("agencyFilter").value = params.agency;
             $('#agencyFilter').trigger('change');
         }
+
         if (params.category) {
             document.getElementById("categoryFilter").value = params.category;
             $('#categoryFilter').trigger('change');
         }
 
-        // Accept either "title" or fallback to "search"
         const titleValue = params.title || params.search;
         if (titleValue) {
             document.getElementById("searchInput").value = titleValue;
