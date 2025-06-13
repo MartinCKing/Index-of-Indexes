@@ -293,7 +293,9 @@
                                         renderTable(tableData);
                                         populateFilters(tableData);
                                         adjustDateColumnWidth(tableData);
-                                        applyURLFilters(); // Trigger URL filters after load
+                                        setTimeout(() => {
+    					applyURLFilters();
+					}, 500);  // allow time for dropdowns to initialize
                                     },
                                     skipEmptyLines: true
                                 });
