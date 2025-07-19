@@ -439,8 +439,16 @@
 
     function populateDropdown(dropdown, items) {
     const isMulti = dropdown.id === 'dateFilter';  // Only allow multiple for dates
-    dropdown.innerHTML = (isMulti ? '' : '<option value="">Select ' + dropdown.id.replace('Filter', '') + '</option>') +
-        items.map(item => `<option value="${item}">${item}</option>`).join('');
+    dropdown.innerHTML = (isMulti ? '' : '<option value="">Select ' + dropdown.id.replace('Filter', '') + '</option>');
+
+items.forEach(item => {
+    const option = document.createElement("option");
+    option.value = item;
+    option.textContent = item;
+    dropdown.appendChild(option);
+});
+
+$(`#${dropdown.id}`).val(null); // clear any selected default
 
     $(`#${dropdown.id}`).select2({
         placeholder: 'Select ' + dropdown.id.replace('Filter', ''),
