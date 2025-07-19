@@ -109,7 +109,12 @@
 
         /* Reduce font size inside dropdown options */
         .select2-container--default .select2-selection--single .select2-selection__rendered {
-            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .select2-selection__choice {
+         font-weight: normal !important;
+         font-size: 12px !important; /* optional: smaller text */
         }
 
         .select2-dropdown .select2-results__options {
@@ -330,22 +335,23 @@
         const params = getQueryParams();
 
         if (params.date) {
-            let normalizedDate = params.date;
-
-            // Convert YYYY-MM-DD → D. Month YYYY
-            if (/^\d{4}-\d{2}-\d{2}$/.test(params.date)) {
-                const [year, month, day] = params.date.split("-");
-                const months = [
-                    "January", "February", "March", "April", "May", "June",
-                    "July", "August", "September", "October", "November", "December"
-                ];
-                const monthName = months[parseInt(month) - 1];
-                normalizedDate = `${parseInt(day)}. ${monthName} ${year}`;
-            }
-
-            document.getElementById("dateFilter").value = normalizedDate;
-            $('#dateFilter').trigger('change');
+    let rawDates = params.date.split(","); // e.g., ?date=1. January 2024,15. March 2024
+    let normalizedDates = rawDates.map(d => {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(d.trim())) {
+            const [year, month, day] = d.trim().split("-");
+            const months = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+            const monthName = months[parseInt(month) - 1];
+            return `${parseInt(day)}. ${monthName} ${year}`;
+        } else {
+            return d.trim();
         }
+    });
+
+    $('#dateFilter').val(normalizedDates).trigger('change');
+}
 
         if (params.agency) {
             document.getElementById("agencyFilter").value = params.agency;
@@ -432,15 +438,17 @@
     }
 
     function populateDropdown(dropdown, items) {
-        dropdown.innerHTML = '<option value="">Select ' + dropdown.id.replace('Filter', '') + '</option>' +
-            items.map(item => `<option value="${item}">${item}</option>`).join('');
+    const isMulti = dropdown.id === 'dateFilter';  // Only allow multiple for dates
+    dropdown.innerHTML = (isMulti ? '' : '<option value="">Select ' + dropdown.id.replace('Filter', '') + '</option>') +
+        items.map(item => `<option value="${item}">${item}</option>`).join('');
 
-        $(`#${dropdown.id}`).select2({
-            placeholder: 'Select ' + dropdown.id.replace('Filter', ''),
-            allowClear: true,
-            width: '100%'
-        });
-    }
+    $(`#${dropdown.id}`).select2({
+        placeholder: 'Select ' + dropdown.id.replace('Filter', ''),
+        allowClear: true,
+        multiple: isMulti,
+        width: '100%'
+    });
+}
 
     function adjustDateColumnWidth(data) {
         const dateColumn = document.getElementById('dateColumn');
@@ -450,22 +458,22 @@
     }
 
     function filterTable() {
-        const dateFilter = document.getElementById('dateFilter').value.toUpperCase();
+        const dateFilterValues = $('#dateFilter').val() || [];  // This returns an array of selected values
         const agencyFilter = document.getElementById('agencyFilter').value.toUpperCase();
         const categoryFilter = document.getElementById('categoryFilter').value.toUpperCase();
         const titleSearch = document.getElementById('searchInput').value.toUpperCase();
 
         const filteredData = tableData.filter(row => {
-            const date = row[0]?.toUpperCase() || '';
-            const agency = row[1]?.toUpperCase() || '';
-            const category = row[2]?.toUpperCase() || '';
-            const title = row[3]?.toUpperCase() || '';
+        const date = row[0] || '';  // KEEP ORIGINAL CASE
+     const agency = row[1]?.toUpperCase() || '';
+     const category = row[2]?.toUpperCase() || '';
+     const title = row[3]?.toUpperCase() || '';
 
-            return (!dateFilter || date === dateFilter) &&
-                   (!agencyFilter || agency === agencyFilter) &&
-                   (!categoryFilter || category === categoryFilter) &&
-                   (!titleSearch || title.includes(titleSearch));
-        });
+    return (!dateFilterValues.length || dateFilterValues.includes(date)) &&
+           (!agencyFilter || agency === agencyFilter) &&
+           (!categoryFilter || category === categoryFilter) &&
+           (!titleSearch || title.includes(titleSearch));
+});
 
         renderTable(filteredData);
     }
