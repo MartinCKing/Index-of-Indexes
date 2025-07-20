@@ -141,13 +141,20 @@
             color: #0778AB;
         }
 	@media screen and (max-width: 600px) {
-    	/* Hide columns 1 (Ask AI), 3 (Agency), 4 (Category) */
+    	/* Hide Agency and Category columns (3 and 4) */
    	 th:nth-child(3),
-   	 td:nth-child(3),
-   	 th:nth-child(4),
-   	 td:nth-child(4) {
-      	  display: none;
-   	 }
+    	td:nth-child(3),
+    	th:nth-child(4),
+    	td:nth-child(4) {
+        display: none;
+    }
+
+    /* Optional: reduce padding/font size further for better fit */
+    th, td {
+        font-size: 12px;
+        padding: 6px;
+    }
+}
 	}
      
 
