@@ -19,25 +19,25 @@
     .banner {
       display: flex;
       align-items: center;
-      justify-content: left;
       background-color: white;
       font-size: 24px;
       font-weight: bold;
       color: red;
       margin: 0 auto 20px;
-      width: fit-content;
-      min-width: 300px;
-      padding: 0 20px;
+      width: 100%;
+      max-width: 700px;
       height: 60px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
     .banner img {
       height: 100%;
+      margin-left: 0;
       margin-right: 10px;
     }
     .banner-text {
       flex-grow: 1;
       text-align: center;
+      margin-right: 40px; /* offset for image width */
     }
     .container {
       padding: 0px;
