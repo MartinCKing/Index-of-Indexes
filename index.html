@@ -46,7 +46,7 @@
     }
     table {
       width: 100%;
-      table-layout: fixed;
+      table-layout: auto;
       border-collapse: collapse;
     }
     th, td {
@@ -63,7 +63,7 @@
       background-color: #ffffff;
     }
     th:nth-child(1), td:nth-child(1) { width: 100px; }
-    th:nth-child(2), td:nth-child(2) { width: 100px; }
+    th:nth-child(2), td:nth-child(2) { width: 1%; white-space: nowrap; }
     th:nth-child(3), td:nth-child(3) { width: 15%; }
     th:nth-child(4), td:nth-child(4) { width: 100px; }
     th:nth-child(5), td:nth-child(5) { white-space: normal; line-height: 1.2em; }
@@ -104,7 +104,9 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
 </head>
+
 <body style="background-color: black;">
   <div class="container">
     <div class="banner">
@@ -118,7 +120,7 @@
     <table id="csvTable">
       <thead>
         <tr>
-          <th>Bing/CoPilot</th>
+          <th>CoPilot</th>
           <th id="dateColumn">Date
             <div><select id="dateFilter" class="filter-select" multiple onchange="filterTable()"></select></div>
           </th>
