@@ -53,7 +53,6 @@
       padding: 10px;
       text-align: left;
       border: 1px solid #ddd;
-      white-space: nowrap;
       overflow: hidden;
     }
     tr:nth-child(even) {
@@ -62,10 +61,10 @@
     tr:nth-child(odd) {
       background-color: #ffffff;
     }
-    th:nth-child(1), td:nth-child(1) { width: 100px; }
+    th:nth-child(1), td:nth-child(1) { width: 100px; white-space: nowrap; }
     th:nth-child(2), td:nth-child(2) { width: 1%; white-space: nowrap; }
-    th:nth-child(3), td:nth-child(3) { width: 15%; }
-    th:nth-child(4), td:nth-child(4) { width: 100px; }
+    th:nth-child(3), td:nth-child(3) { white-space: normal; word-wrap: break-word; }
+    th:nth-child(4), td:nth-child(4) { white-space: nowrap; width: 1%; }
     th:nth-child(5), td:nth-child(5) { white-space: normal; line-height: 1.2em; }
     .filter-select, #searchInput, .select2-container {
       width: 100%;
@@ -104,7 +103,6 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-
 </head>
 
 <body style="background-color: black;">
