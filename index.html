@@ -240,15 +240,16 @@
     function applyURLFilters() {
       const params = getQueryParams();
       if (params.date) {
-        const raw = params.date.split(',');
-        const norm = raw.map(d => {
-          if (/^\d{4}-\d{2}-\d{2}$/.test(d.trim())) {
-            const [y, m, day] = d.trim().split("-");
-            const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-            return `${parseInt(day)}. ${months[parseInt(m)-1]} ${y}`;
-          }
-          return d.trim();
-        });
+const raw = params.date.split(',');
+const norm = raw.map(d => {
+  const cleaned = d.trim().replace(/\s+/g, ''); // removes all spaces
+  if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) {
+    const [y, m, day] = cleaned.split("-");
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    return `${parseInt(day)}. ${months[parseInt(m)-1]} ${y}`;
+  }
+  return d.trim();
+});
         $('#dateFilter').val(norm).trigger('change');
       }
       if (params.agency) $('#agencyFilter').val(params.agency).trigger('change');
