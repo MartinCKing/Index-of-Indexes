@@ -126,67 +126,65 @@
     const CSV_SOURCES = [
       'https://martincking.github.io/Index-of-Indexes/Index of Indexes 2025.csv',
       'https://martincking.github.io/Index-of-Indexes/Index of Indexes 2024.csv'
-      // add more CSV URLs as needed
     ];
-    const URL_MAP_FILE = 'https://martincking.github.io/Index-of-Indexes/URL.csv';
-    const AGENCY_MAP_FILE = 'https://martincking.github.io/Agencies.csv';
+    const URL_MAP_FILE   = 'https://martincking.github.io/Index-of-Indexes/URL.csv';
+    const AGENCY_MAP_FILE = 'https://martincking.github.io/Index-of-Indexes/Agencies.csv'; // same folder as others
 
     let tableData = [];          // rows: [Date, Agency, Category, Title, Link?]
     let dateURLMapping = {};     // Date (exact string) -> URL
+    let agencyURLMapping = {};   // Normalized Agency -> URL
     let longestDateLength = 0;
 
-    // Robust header detector (handles spacing/case)
+    // Helpers
     const norm = s => String(s || '').toLowerCase().replace(/\s+/g,'');
     const looksLikeHeader = row =>
       row && row.length >= 4 &&
       norm(row[0]).includes('date') &&
       norm(row[1]).includes('agency');
 
-function loadCSVFiles() {
-  // 1) Load Agency -> URL map
-  fetch(encodeURI(AGENCY_MAP_FILE))
-    .then(res => res.text())
-    .then(text => {
-      Papa.parse(text, {
-        complete: results => {
-          results.data.forEach(row => {
-            const agency = (row[0] || '').trim();
-            const url = (row[1] || '').trim();
-            if (agency && url) agencyURLMapping[agency] = url;
-          });
+    // Normalize agency names for robust matching
+    const normAgency = s => String(s || '').trim().replace(/\s+/g,' ').toUpperCase();
 
-          // 2) Load Date -> URL map (exact match, keep any leading spaces)
-          fetch(encodeURI(URL_MAP_FILE))
+    function loadCSVFiles() {
+      // 1) Load Agency -> URL map (don’t block the rest if it fails)
+      fetch(encodeURI(`${AGENCY_MAP_FILE}?t=${Date.now()}`))
+        .then(res => res.text())
+        .then(text => {
+          Papa.parse(text, {
+            complete: results => {
+              results.data.forEach((row, i) => {
+                if (i === 0 && String(row[0]).toLowerCase().includes('agency')) return; // skip header
+                const key = normAgency(row[0]);
+                const url = (row[1] || '').trim();
+                if (key && url) agencyURLMapping[key] = url;
+              });
+              // console.log('Agencies mapped:', Object.keys(agencyURLMapping).length);
+            },
+            skipEmptyLines: true
+          });
+        })
+        .catch(() => { /* ignore and continue */ })
+        .finally(() => {
+          // 2) Load Date -> URL map, then data CSVs
+          fetch(encodeURI(`${URL_MAP_FILE}?t=${Date.now()}`))
             .then(res => res.text())
             .then(text => {
-Papa.parse(text, {
-  complete: results => {
-    results.data.forEach((row, i) => {
-      // Skip header row if it contains "Date" or "URL"
-      if (i === 0 && String(row[0]).toLowerCase().includes('date')) return;
-
-      const date = (row[0] == null) ? '' : String(row[0]);
-      const url  = (row[1] || '').trim();
-      if (date && url) dateURLMapping[date] = url;
-    });
-    fetchAndCombineDataCSVs(); // Continue after parsing
-  },
-  skipEmptyLines: true
-});
-
-                  // 3) Load & merge ALL data CSVs
+              Papa.parse(text, {
+                complete: results => {
+                  results.data.forEach((row, i) => {
+                    if (i === 0 && String(row[0]).toLowerCase().includes('date')) return; // skip header
+                    const date = (row[0] == null) ? '' : String(row[0]); // keep exact spacing
+                    const url  = (row[1] || '').trim();
+                    if (date && url) dateURLMapping[date] = url;
+                  });
                   fetchAndCombineDataCSVs();
                 },
                 skipEmptyLines: true
               });
             })
             .catch(() => fetchAndCombineDataCSVs());
-        },
-        skipEmptyLines: true
-      });
-    })
-    .catch(() => fetchAndCombineDataCSVs());
-}
+        });
+    }
 
     function fetchAndCombineDataCSVs() {
       Promise.all(
@@ -200,7 +198,7 @@ Papa.parse(text, {
           rowsOnly.forEach(r => {
             if (!r || r.every(cell => !cell)) return;
             // Expected: Date, Agency, Category, Title[, Link]
-            const date     = (r[0] == null) ? '' : String(r[0]);  // NO .trim() — preserve leading space in Date
+            const date     = (r[0] == null) ? '' : String(r[0]);  // keep exact value
             const agency   = (r[1] || '').trim();
             const category = (r[2] || '').trim();
             const title    = (r[3] || '').trim();
@@ -212,10 +210,7 @@ Papa.parse(text, {
           });
         });
 
-        // Optional: de-dupe identical rows
-        // Keep everything (no de-dupe)
         tableData = merged;
-
         renderTable(tableData);
         populateFilters(tableData);
         adjustDateColumnWidth(tableData);
@@ -236,6 +231,9 @@ Papa.parse(text, {
         // Date hyperlink via URL.csv mapping — exact match (leading space blocks linking)
         const dateLink = dateURLMapping[date];
 
+        // Agency hyperlink via Agencies.csv mapping — normalized match
+        const aUrl = agencyURLMapping[normAgency(agency)];
+
         // CoPilot (Bing) link built from Agency + Category + Title
         const query = encodeURIComponent(`${agency} ${category} ${title}`);
         const copilot = `<a href="https://www.bing.com/search?q=${query}&showconv=1" target="_blank" rel="noopener">Copilot</a>`;
@@ -243,8 +241,7 @@ Papa.parse(text, {
         return `<tr>
           <td>${copilot}</td>
           <td>${dateLink ? `<a href="${dateLink}" target="_blank" rel="noopener">${date}</a>` : date}</td>
-          <td>${agencyURLMapping[agency] ? `<a href="${agencyURLMapping[agency]}" target="_blank" rel="noopener">${agency}</a>` : agency}</td>
-
+          <td>${aUrl ? `<a href="${aUrl}" target="_blank" rel="noopener">${agency}</a>` : agency}</td>
           <td>${category}</td>
           <td>${titleLink}</td>
         </tr>`;
@@ -313,7 +310,7 @@ Papa.parse(text, {
       const params = getQueryParams();
       if (params.date) {
         const raw = params.date.split(',');
-        const normDates = raw.map(d => d); // keep exact values; do NOT normalize/trim (to preserve leading space)
+        const normDates = raw.map(d => d); // keep exact values
         $('#dateFilter').val(normDates).trigger('change');
       }
       if (params.agency)   $('#agencyFilter').val(params.agency).trigger('change');
