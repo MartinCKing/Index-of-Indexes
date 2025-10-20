@@ -241,8 +241,8 @@
         return `<tr>
           <td>${copilot}</td>
           <td>${dateLink ? `<a href="${dateLink}" target="_blank" rel="noopener">${date}</a>` : date}</td>
-          <td>${aUrl ? `<a href="${aUrl}" target="_blank" rel="noopener">${agency}</a>` : agency}</td>
-          <td>${category}</td>
+          <td><b>${aUrl ? `<a href="${aUrl}" target="_blank" rel="noopener">${agency}</b></a>` : agency}</td>
+          <td><b>${category}</b></td>
           <td>${titleLink}</td>
         </tr>`;
       }).join('');
@@ -364,3 +364,4 @@
   </script>
 </body>
 </html>
+
