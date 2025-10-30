@@ -55,6 +55,17 @@
     .main-title span:not(.blue) { color: #FBBB6A; }
     h1 { font-size: 24px; font-weight: bold; text-align: center; margin-top: 0px; color: white; }
 
+    /* Copilot button style (looks like a text link) */
+    .copilot-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      font: inherit;
+      text-decoration: underline;
+      cursor: pointer;
+      color: #06c;
+    }
+
     @media screen and (max-width: 600px) {
       th:nth-child(3), td:nth-child(3),
       th:nth-child(4), td:nth-child(4) { display: none; }
@@ -65,23 +76,6 @@
     }
   </style>
 
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-81366NTXDQ"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date()); gtag('config', 'G-81366NTXDQ');
-  </script>
-
-  <!-- Microsoft Clarity -->
-  <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "po84md6uax");
-  </script>
-
   <!-- libs -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
@@ -89,7 +83,6 @@
 </head>
 
 <body style="background-color: black;">
-  <p>Regulatory Roundup Index Search<a href="https://martincking.github.io/Index-of-Indexes/"></a>.</p>
   <div class="container">
     <div class="banner">
       <img src="Swissflag.png" alt="Swiss Flag">
@@ -129,52 +122,46 @@
       'https://martincking.github.io/Index-of-Indexes/Index of Indexes 2024.csv'
     ];
     const URL_MAP_FILE   = 'https://martincking.github.io/Index-of-Indexes/URL.csv';
-    const AGENCY_MAP_FILE = 'https://martincking.github.io/Index-of-Indexes/Agencies.csv'; // same folder as others
+    const AGENCY_MAP_FILE = 'https://martincking.github.io/Index-of-Indexes/Agencies.csv';
 
-    let tableData = [];          // rows: [Date, Agency, Category, Title, Link?]
-    let dateURLMapping = {};     // Date (exact string) -> URL
-    let agencyURLMapping = {};   // Normalized Agency -> URL
-    let longestDateLength = 0;
+    let tableData = [];
+    let dateURLMapping = {};
+    let agencyURLMapping = {};
 
-    // Helpers
     const norm = s => String(s || '').toLowerCase().replace(/\s+/g,'');
     const looksLikeHeader = row =>
       row && row.length >= 4 &&
       norm(row[0]).includes('date') &&
       norm(row[1]).includes('agency');
 
-    // Normalize agency names for robust matching
     const normAgency = s => String(s || '').trim().replace(/\s+/g,' ').toUpperCase();
 
     function loadCSVFiles() {
-      // 1) Load Agency -> URL map (don’t block the rest if it fails)
       fetch(encodeURI(`${AGENCY_MAP_FILE}?t=${Date.now()}`))
         .then(res => res.text())
         .then(text => {
           Papa.parse(text, {
             complete: results => {
               results.data.forEach((row, i) => {
-                if (i === 0 && String(row[0]).toLowerCase().includes('agency')) return; // skip header
+                if (i === 0 && String(row[0]).toLowerCase().includes('agency')) return;
                 const key = normAgency(row[0]);
                 const url = (row[1] || '').trim();
                 if (key && url) agencyURLMapping[key] = url;
               });
-              // console.log('Agencies mapped:', Object.keys(agencyURLMapping).length);
             },
             skipEmptyLines: true
           });
         })
-        .catch(() => { /* ignore and continue */ })
+        .catch(() => {})
         .finally(() => {
-          // 2) Load Date -> URL map, then data CSVs
           fetch(encodeURI(`${URL_MAP_FILE}?t=${Date.now()}`))
             .then(res => res.text())
             .then(text => {
               Papa.parse(text, {
                 complete: results => {
                   results.data.forEach((row, i) => {
-                    if (i === 0 && String(row[0]).toLowerCase().includes('date')) return; // skip header
-                    const date = (row[0] == null) ? '' : String(row[0]); // keep exact spacing
+                    if (i === 0 && String(row[0]).toLowerCase().includes('date')) return;
+                    const date = (row[0] == null) ? '' : String(row[0]);
                     const url  = (row[1] || '').trim();
                     if (date && url) dateURLMapping[date] = url;
                   });
@@ -195,22 +182,16 @@
         texts.forEach(txt => {
           const parsed = Papa.parse(txt, { skipEmptyLines: true }).data;
           const rowsOnly = (parsed.length && looksLikeHeader(parsed[0])) ? parsed.slice(1) : parsed;
-
           rowsOnly.forEach(r => {
             if (!r || r.every(cell => !cell)) return;
-            // Expected: Date, Agency, Category, Title[, Link]
-            const date     = (r[0] == null) ? '' : String(r[0]);  // keep exact value
+            const date     = (r[0] == null) ? '' : String(r[0]);
             const agency   = (r[1] || '').trim();
             const category = (r[2] || '').trim();
             const title    = (r[3] || '').trim();
-            const link     = (r[4] || '').trim(); // optional: direct title link
-
-            if (date || agency || category || title) {
-              merged.push([date, agency, category, title, link]);
-            }
+            const link     = (r[4] || '').trim();
+            if (date || agency || category || title) merged.push([date, agency, category, title, link]);
           });
         });
-
         tableData = merged;
         renderTable(tableData);
         populateFilters(tableData);
@@ -223,31 +204,24 @@
       const tableBody = document.getElementById('tableBody');
       tableBody.innerHTML = data.map(row => {
         const [date, agency, category, title, link] = row;
-
-        // Title hyperlink priority: direct Link column if starts with http; else plain text
         const titleLink = (link && /^https?:\/\//i.test(link))
           ? `<a href="${link}" target="_blank" rel="noopener">${title || link}</a>`
           : title;
-
-        // Date hyperlink via URL.csv mapping — exact match (leading space blocks linking)
         const dateLink = dateURLMapping[date];
-
-        // Agency hyperlink via Agencies.csv mapping — normalized match
         const aUrl = agencyURLMapping[normAgency(agency)];
 
-        // CoPilot (Bing) link built from Agency + Category + Title
-        const query = encodeURIComponent(`${agency} ${category} ${title}`);
-        const copilot = `<a href="https://www.bing.com/search?q=${query}&showconv=1" target="_blank" rel="noopener">Copilot</a>`;
+        // Copilot button version
+        const query = encodeURIComponent([agency, category, title].filter(Boolean).join(' '));
+        const copilot = `<button type="button" class="copilot-btn" data-q="${query}">Copilot</button>`;
 
         return `<tr>
           <td>${copilot}</td>
           <td>${dateLink ? `<a href="${dateLink}" target="_blank" rel="noopener">${date}</a>` : date}</td>
-          <td><b>${aUrl ? `<a href="${aUrl}" target="_blank" rel="noopener">${agency}</b></a>` : agency}</td>
+          <td>${aUrl ? `<b><a href="${aUrl}" target="_blank" rel="noopener">${agency}</a></b>` : `<b>${agency}</b>`}</td>
           <td><b>${category}</b></td>
           <td>${titleLink}</td>
         </tr>`;
       }).join('');
-
       document.getElementById('entryCount').textContent = `(${data.length.toLocaleString()} entries)`;
     }
 
@@ -256,7 +230,6 @@
             agency = (document.getElementById('agencyFilter').value || '').toUpperCase(),
             category = (document.getElementById('categoryFilter').value || '').toUpperCase(),
             titleSearch = (document.getElementById('searchInput').value || '').toUpperCase();
-
       const filtered = tableData.filter(row => {
         const [date, a, c, t] = row;
         return (!selectedDates.length || selectedDates.includes(date)) &&
@@ -311,59 +284,25 @@
       const params = getQueryParams();
       if (params.date) {
         const raw = params.date.split(',');
-        const normDates = raw.map(d => d); // keep exact values
-        $('#dateFilter').val(normDates).trigger('change');
+        $('#dateFilter').val(raw).trigger('change');
       }
       if (params.agency)   $('#agencyFilter').val(params.agency).trigger('change');
       if (params.category) $('#categoryFilter').val(params.category).trigger('change');
       if (params.title || params.search)
         document.getElementById('searchInput').value = params.title || params.search;
-
       filterTable();
     }
 
+    // Copilot button click handler (opens new tab safely)
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.copilot-btn');
+      if (!btn) return;
+      const q = btn.getAttribute('data-q');
+      const url = `https://www.bing.com/search?q=${q}&showconv=1`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+
     window.onload = loadCSVFiles;
-  </script>
-
-  <!-- Cookie Consent Popup -->
-  <div id="cookie-popup" style="position:fixed;bottom:20px;left:20px;right:20px;background:#fff;border:1px solid #ccc;padding:20px;z-index:9999;font-family:sans-serif;">
-    <p>Cookies are used to improve your experience and analyze site usage. By clicking “Accept,” you agree to our use of cookies for analytics.</p>
-    <button id="accept-cookies" style="margin-right:10px;">Accept</button>
-    <button id="decline-cookies">Decline</button>
-  </div>
-
-  <script>
-    // Check stored consent on page load
-    const storedConsent = localStorage.getItem("cookieConsent");
-    if (storedConsent) {
-      document.getElementById("cookie-popup").style.display = "none";
-      if (window.clarity) {
-        window.clarity('consentv2', {
-          ad_storage: storedConsent,
-          analytics_storage: storedConsent
-        });
-      }
-    }
-
-    // Handle Accept
-    document.getElementById("accept-cookies").onclick = function() {
-      if (window.clarity) {
-        window.clarity('consentv2', { ad_storage: "granted", analytics_storage: "granted" });
-      }
-      localStorage.setItem("cookieConsent", "granted");
-      document.getElementById("cookie-popup").style.display = "none";
-    };
-
-    // Handle Decline
-    document.getElementById("decline-cookies").onclick = function() {
-      if (window.clarity) {
-        window.clarity('consentv2', { ad_storage: "denied", analytics_storage: "denied" });
-      }
-      localStorage.setItem("cookieConsent", "denied");
-      document.getElementById("cookie-popup").style.display = "none";
-    };
   </script>
 </body>
 </html>
-
-
