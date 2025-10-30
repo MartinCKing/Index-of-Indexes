@@ -208,11 +208,10 @@
 
         // Build Copilot link (anchor we intercept)
         const query = encodeURIComponent([agency, category, title].filter(Boolean).join(' '));
-        const copilot = `<a href="https://www.bing.com/search?q=${query}&showconv=1" 
-                            class="copilot-link" 
-                            data-q="${query}" 
-                            rel="noopener noreferrer"
-                            target="_blank">Copilot</a>`;
+        const copilot = `<a href="https://www.bing.com/search?q=${query}"
+                         class="copilot-link"
+                        target="_blank"
+                        rel="noopener noreferrer">Bing</a>`;
 
         return `<tr>
           <td>${copilot}</td>
@@ -345,3 +344,4 @@
   </script>
 </body>
 </html>
+
