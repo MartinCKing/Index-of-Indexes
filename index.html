@@ -54,17 +54,7 @@
     .main-title span.blue { color: #0778AB; }
     .main-title span:not(.blue) { color: #FBBB6A; }
     h1 { font-size: 24px; font-weight: bold; text-align: center; margin-top: 0px; color: white; }
-
-    /* Copilot button style (looks like a text link) */
-    .copilot-btn {
-      background: none;
-      border: none;
-      padding: 0;
-      font: inherit;
-      text-decoration: underline;
-      cursor: pointer;
-      color: #06c;
-    }
+    .copilot-link { text-decoration: underline; }
 
     @media screen and (max-width: 600px) {
       th:nth-child(3), td:nth-child(3),
@@ -98,16 +88,16 @@
         <tr>
           <th>CoPilot</th>
           <th id="dateColumn">Date
-            <div><select id="dateFilter" class="filter-select" multiple onchange="filterTable()"></select></div>
+            <div><select id="dateFilter" class="filter-select" multiple onchange="filterTable(); saveState();"></select></div>
           </th>
           <th>Agency
-            <div><select id="agencyFilter" class="filter-select" onchange="filterTable()"></select></div>
+            <div><select id="agencyFilter" class="filter-select" onchange="filterTable(); saveState();"></select></div>
           </th>
           <th>Category
-            <div><select id="categoryFilter" class="filter-select" onchange="filterTable()"></select></div>
+            <div><select id="categoryFilter" class="filter-select" onchange="filterTable(); saveState();"></select></div>
           </th>
           <th>Title
-            <div><input type="text" id="searchInput" class="filter-select" onkeyup="filterTable()" placeholder="Keyword Search Title.."></div>
+            <div><input type="text" id="searchInput" class="filter-select" onkeyup="filterTable(); saveState();" placeholder="Keyword Search Title.."></div>
           </th>
         </tr>
       </thead>
@@ -128,6 +118,10 @@
     let dateURLMapping = {};
     let agencyURLMapping = {};
 
+    // --- State persistence keys
+    const STATE_KEY = 'rr_state_v2';
+
+    // Helpers
     const norm = s => String(s || '').toLowerCase().replace(/\s+/g,'');
     const looksLikeHeader = row =>
       row && row.length >= 4 &&
@@ -196,7 +190,7 @@
         renderTable(tableData);
         populateFilters(tableData);
         adjustDateColumnWidth(tableData);
-        setTimeout(applyURLFilters, 100);
+        setTimeout(() => { restoreState(); applyURLFilters(); }, 100);
       });
     }
 
@@ -204,15 +198,21 @@
       const tableBody = document.getElementById('tableBody');
       tableBody.innerHTML = data.map(row => {
         const [date, agency, category, title, link] = row;
+
         const titleLink = (link && /^https?:\/\//i.test(link))
           ? `<a href="${link}" target="_blank" rel="noopener">${title || link}</a>`
           : title;
+
         const dateLink = dateURLMapping[date];
         const aUrl = agencyURLMapping[normAgency(agency)];
 
-        // Copilot button version
+        // Build Copilot link (anchor we intercept)
         const query = encodeURIComponent([agency, category, title].filter(Boolean).join(' '));
-        const copilot = `<button type="button" class="copilot-btn" data-q="${query}">Copilot</button>`;
+        const copilot = `<a href="https://www.bing.com/search?q=${query}&showconv=1" 
+                            class="copilot-link" 
+                            data-q="${query}" 
+                            rel="noopener noreferrer"
+                            target="_blank">Copilot</a>`;
 
         return `<tr>
           <td>${copilot}</td>
@@ -230,6 +230,7 @@
             agency = (document.getElementById('agencyFilter').value || '').toUpperCase(),
             category = (document.getElementById('categoryFilter').value || '').toUpperCase(),
             titleSearch = (document.getElementById('searchInput').value || '').toUpperCase();
+
       const filtered = tableData.filter(row => {
         const [date, a, c, t] = row;
         return (!selectedDates.length || selectedDates.includes(date)) &&
@@ -238,6 +239,34 @@
                (!titleSearch || (t || '').toUpperCase().includes(titleSearch));
       });
       renderTable(filtered);
+    }
+
+    // --- Save/restore UI state (filters + scroll)
+    function saveState() {
+      try {
+        const state = {
+          dates: $('#dateFilter').val() || [],
+          agency: document.getElementById('agencyFilter').value || '',
+          category: document.getElementById('categoryFilter').value || '',
+          title: document.getElementById('searchInput').value || '',
+          scrollY: window.scrollY || 0
+        };
+        localStorage.setItem(STATE_KEY, JSON.stringify(state));
+      } catch(e) {}
+    }
+
+    function restoreState() {
+      try {
+        const raw = localStorage.getItem(STATE_KEY);
+        if (!raw) return;
+        const s = JSON.parse(raw);
+        if (s.dates && s.dates.length) $('#dateFilter').val(s.dates).trigger('change');
+        if (s.agency)   $('#agencyFilter').val(s.agency).trigger('change');
+        if (s.category) $('#categoryFilter').val(s.category).trigger('change');
+        if (s.title)    document.getElementById('searchInput').value = s.title;
+        filterTable();
+        if (typeof s.scrollY === 'number') window.scrollTo(0, s.scrollY);
+      } catch(e) {}
     }
 
     function populateFilters(data) {
@@ -290,16 +319,26 @@
       if (params.category) $('#categoryFilter').val(params.category).trigger('change');
       if (params.title || params.search)
         document.getElementById('searchInput').value = params.title || params.search;
+
       filterTable();
     }
 
-    // Copilot button click handler (opens new tab safely)
+    // Intercept Copilot clicks: save state, try to open new tab; if blocked, navigate.
     document.addEventListener('click', (e) => {
-      const btn = e.target.closest('.copilot-btn');
-      if (!btn) return;
-      const q = btn.getAttribute('data-q');
+      const a = e.target.closest('a.copilot-link');
+      if (!a) return;
+      e.preventDefault();
+      const q = a.getAttribute('data-q') || '';
       const url = `https://www.bing.com/search?q=${q}&showconv=1`;
-      window.open(url, '_blank', 'noopener,noreferrer');
+
+      // Persist UI state before leaving
+      saveState();
+
+      const w = window.open(url, '_blank', 'noopener,noreferrer');
+      if (!w) {
+        // Popup blocked: as a fallback, navigate current tab (state will restore on return/reload)
+        window.location.href = url;
+      }
     });
 
     window.onload = loadCSVFiles;
