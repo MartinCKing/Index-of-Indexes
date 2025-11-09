@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload to Index of Indexes</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; background-color: #f9f9f9; }
+    input[type="file"] { margin-bottom: 1em; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1em; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
+    th { background-color: #f4f4f4; }
+    #status { margin-top: 1em; font-weight: bold; color: #d00; }
+    #emailInfo { margin-top: 1em; font-weight: bold; color: #006400; }
+    #fallback { margin-top: 1em; font-weight: bold; color: #b00; }
+    button { margin-top: 1em; padding: 0.5em 1em; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>📢 Contribute to the Index of Indexes</h2>
+  <p>Upload your CSV file in this format:</p>
+  <pre>Date,Poster,Type of Post,Subject Title,Link</pre>
+
+  <input type="file" id="fileInput" accept=".csv" />
+  <div id="status"></div>
+  <div id="emailInfo"></div>
+  <div id="fallback"></div>
+  <div id="preview"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script>
+    const requiredHeaders = ["Date", "Poster", "Type of Post", "Subject Title", "Link"];
+    const fileInput = document.getElementById('fileInput');
+    const status = document.getElementById('status');
+    const emailInfo = document.getElementById('emailInfo');
+    const fallback = document.getElementById('fallback');
+    const preview = document.getElementById('preview');
+
+    fileInput.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      status.textContent = '';
+      emailInfo.innerHTML = '';
+      fallback.textContent = '';
+      preview.innerHTML = '';
+
+      if (!file) {
+        status.textContent = "❌ Please select a CSV file.";
+        return;
+      }
+
+      if (!file.name.endsWith('.csv')) {
+        status.textContent = "❌ Only CSV files are supported.";
+        return;
+      }
+
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+          const data = results.data.filter(row => Object.values(row).some(cell => cell.trim() !== ""));
+          if (!data.length) {
+            status.textContent = "⚠️ No valid rows found in the file.";
+            return;
+          }
+
+          const headers = Object.keys(data[0]);
+          const missing = requiredHeaders.filter(h => !headers.includes(h));
+
+          if (missing.length > 0) {
+            status.textContent = "⚠️ Missing required columns: " + missing.join(", ");
+            return;
+          }
+
+          status.textContent = "✅ Format looks good!";
+          emailInfo.innerHTML = '<button id="emailButton">📧 Email for including in Index of Indexes</button>';
+          renderTable(data);
+
+          document.getElementById('emailButton').addEventListener('click', function () {
+            const mailtoLink = 'mailto:IndexofIndexes@outlook.com?subject=Index%20Submission&body=Hi,%0A%0APlease%20find%20attached%20my%20CSV%20file%20for%20the%20Index%20of%20Indexes.%0A%0ABest%20regards,%0AMartin';
+            window.location.href = mailtoLink;
+            fallback.textContent = "📧 If your email client didn't open, please manually send your file to: IndexofIndexes@outlook.com";
+          });
+        },
+        error: function (err) {
+          status.textContent = "❌ Error parsing file: " + err.message;
+        }
+      });
+    });
+
+    function renderTable(data) {
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      const tbody = document.createElement('tbody');
+
+      const headerRow = document.createElement('tr');
+      ["Copilot", "Date", "Poster", "Type of Post", "Subject Title"].forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        const date = row["Date"] || '';
+        const poster = row["Poster"] || '';
+        const type = row["Type of Post"] || '';
+        const title = row["Subject Title"] || '';
+        const link = row["Link"] || '';
+
+        const copilotQuery = encodeURIComponent(`${poster} ${type} ${title}`);
+        const copilotLink = `<a href="https://www.bing.com/copilotsearch?q=${copilotQuery}&showconv=1" target="_blank">Copilot</a>`;
+        const titleCell = link.startsWith("http")
+          ? `<a href="${link}" target="_blank">${title}</a>`
+          : title;
+
+        tr.innerHTML = `
+          <td>${copilotLink}</td>
+          <td>${date}</td>
+          <td>${poster}</td>
+          <td><b>${type}</b></td>
+          <td>${titleCell}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(thead);
+      table.appendChild(tbody);
+      preview.innerHTML = '<h3>Preview (as it will appear in the Index):</h3>';
+      preview.appendChild(table);
+    }
+  </script>
+</body>
+</html>
