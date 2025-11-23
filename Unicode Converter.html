@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Unicode Style Converter (Auto + Manual)</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #inputBox {
+        width: 100%;
+        min-height: 180px;
+        border: 1px solid #aaa;
+        padding: 10px;
+        font-size: 16px;
+    }
+    textarea {
+        width: 100%;
+        height: 180px;
+        font-size: 16px;
+        margin-top: 15px;
+    }
+    select, button {
+        padding: 8px 14px;
+        font-size: 15px;
+        margin-top: 10px;
+        margin-right: 10px;
+    }
+</style>
+</head>
+<body>
+
+<h2>Unicode Style Converter</h2>
+
+<p>
+    <b>Input (rich text):</b><br>
+    Use <b>Ctrl+B</b> / <i>Ctrl+I</i> etc. to format text here.  
+</p>
+
+<div id="inputBox" contenteditable="true">
+    Type or paste text here… make some <b>bold</b>, some <i>italic</i>, some <b><i>both</i></b>.
+</div>
+
+<p>
+    <label for="modeSelect"><b>Output mode:</b></label>
+    <select id="modeSelect">
+        <option value="auto">Auto (detect from input formatting)</option>
+        <option value="normal">Normal (no style, just bullets → 🔸)</option>
+        <option value="bold">Force Bold</option>
+        <option value="italic">Force Italic</option>
+        <option value="bolditalic">Force Bold + Italic</option>
+    </select>
+
+    <button onclick="convert()">Convert</button>
+</p>
+
+<h3>Output (plain Unicode text):</h3>
+<textarea id="outputText" readonly></textarea>
+
+<script>
+// --- Mapping based on your Python script ---------------------------
+
+const sansBold = {
+'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡',
+'O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭',
+'a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'𝗷','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻',
+'o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇',
+'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵'
+};
+
+const sansItalic = {
+'A':'𝘈','B':'𝘉','C':'𝘊','D':'𝘋','E':'𝘌','F':'𝘍','G':'𝘎','H':'𝘏','I':'𝘐','J':'𝘑','K':'𝘒','L':'𝘓','M':'𝘔','N':'𝘕',
+'O':'𝘖','P':'𝘗','Q':'𝘘','R':'𝘙','S':'𝘚','T':'𝘛','U':'𝘜','V':'𝘝','W':'𝘞','X':'𝘟','Y':'𝘠','Z':'𝘡',
+'a':'𝘢','b':'𝘣','c':'𝘤','d':'𝘥','e':'𝘦','f':'𝘧','g':'𝘨','h':'𝘩','i':'𝘪','j':'𝘫','k':'𝘬','l':'𝘭','m':'𝘮','n':'𝘯',
+'o':'𝘰','p':'𝘱','q':'𝘲','r':'𝘳','s':'𝘴','t':'𝘵','u':'𝘶','v':'𝘷','w':'𝘸','x':'𝘹','y':'𝘺','z':'𝘻'
+};
+
+const sansBoldItalic = {
+'A':'𝘼','B':'𝘽','C':'𝘾','D':'𝘿','E':'𝙀','F':'𝙁','G':'𝙂','H':'𝙃','I':'𝙄','J':'𝙅','K':'𝙆','L':'𝙇','M':'𝙈','N':'𝙉',
+'O':'𝙊','P':'𝙋','Q':'𝙌','R':'𝙍','S':'𝙎','T':'𝙏','U':'𝙐','V':'𝙑','W':'𝙒','X':'𝙓','Y':'𝙔','Z':'𝙕',
+'a':'𝙖','b':'𝙗','c':'𝙘','d':'𝙙','e':'𝙚','f':'𝙛','g':'𝙜','h':'𝙝','i':'𝙞','j':'𝙟','k':'𝙠','l':'𝙡','m':'𝙢','n':'𝙣',
+'o':'𝙤','p':'𝙥','q':'𝙦','r':'𝙧','s':'𝙨','t':'𝙩','u':'𝙪','v':'𝙫','w':'𝙬','x':'𝙭','y':'𝙮','z':'𝙯'
+};
+
+// bullet replacement like your Python convert_char
+const bulletChars = ['•', '▪', '●', '◦'];
+
+function convertChar(c, bold, italic) {
+    if (bulletChars.includes(c)) {
+        return '🔸';
+    }
+    if (bold && italic) return sansBoldItalic[c] || c;
+    if (bold) return sansBold[c] || c;
+    if (italic) return sansItalic[c] || c;
+    return c;
+}
+
+// Helpers to detect formatting from DOM
+function isBoldElement(el) {
+    const style = window.getComputedStyle(el);
+    const fw = style.fontWeight;
+    // fw can be "bold" or a number string like "700"
+    return fw === "bold" || parseInt(fw, 10) >= 600;
+}
+
+function isItalicElement(el) {
+    const style = window.getComputedStyle(el);
+    return style.fontStyle === "italic" || style.fontStyle === "oblique";
+}
+
+function convert() {
+    const input = document.getElementById("inputBox");
+    const mode = document.getElementById("modeSelect").value;
+    let output = "";
+
+    if (mode === "auto") {
+        // Walk text nodes and use the formatting of their parent
+        const walker = document.createTreeWalker(input, NodeFilter.SHOW_TEXT, null, false);
+
+        while (walker.nextNode()) {
+            const textNode = walker.currentNode;
+            const parent = textNode.parentElement || input;
+
+            const bold = isBoldElement(parent);
+            const italic = isItalicElement(parent);
+
+            for (let c of textNode.nodeValue) {
+                output += convertChar(c, bold, italic);
+            }
+        }
+    } else {
+        // Global style: ignore formatting, just apply the selected style to all characters
+        const text = input.innerText;  // plain text from editor
+        let bold = false, italic = false;
+
+        if (mode === "bold") { bold = true; italic = false; }
+        else if (mode === "italic") { bold = false; italic = true; }
+        else if (mode === "bolditalic") { bold = true; italic = true; }
+        else if (mode === "normal") { bold = false; italic = false; }
+
+        for (let c of text) {
+            output += convertChar(c, bold, italic);
+        }
+    }
+
+    document.getElementById("outputText").value = output;
+}
+</script>
+
+</body>
+</html>
