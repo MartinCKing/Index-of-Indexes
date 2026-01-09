@@ -14,14 +14,13 @@
 
   <style>
     .copyright-notice {
-    font-size: 0.6em;
-    top: 0px;
-    center: 0px;
-    padding: 0px;
-    border-radius: 10px;
-    background-color: black;
-    color: white;
-    text-align: center;
+      font-size: 0.6em;
+      top: 0px;
+      padding: 0px;
+      border-radius: 10px;
+      background-color: black;
+      color: white;
+      text-align: center;
     }
     body {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -45,8 +44,9 @@
       height: 60px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
-    .banner img { height: 100%; margin-left: 0; margin-: 10px; }
-    .banner-text { flex-grow: 1; text-align: center; margin-: 40px; }
+    .banner img { height: 100%; margin-left: 0; margin-right: 10px; }
+    .banner-text { flex-grow: 1; text-align: center; margin-right: 40px; }
+
     .container { padding: 0; margin: 10px; text-align: center; }
     .table-container { width: 100%; overflow-x: auto; }
     table { width: 100%; table-layout: auto; border-collapse: collapse; }
@@ -91,7 +91,7 @@
   <!-- Microsoft Clarity -->
   <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
-      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)}
       t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
       y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "po84md6uax");
@@ -113,9 +113,11 @@
     <div class="main-title"><span>MedTech </span><span class="blue">Leading</span> <span>Voice</span></div>
     <h1>Regulatory Roundup Index Search <span id="entryCount"></span></h1>
   </div>
+
   <div class="copyright-notice">
-  &copy;2026 Martin King. All rights reserved. The HTML, CSS, and JavaScript code used are protected under copyright law.
+    &copy;2026 Martin King. All rights reserved. The HTML, CSS, and JavaScript code used are protected under copyright law.
   </div>
+
   <div class="table-container">
     <table id="csvTable">
       <thead>
@@ -140,20 +142,21 @@
   </div>
 
   <script>
-    // ========= ADD/REMOVE YOUR CSVs HERE =========
-    const CSV_SOURCES = [
-      'https://martincking.github.io/Index-of-Indexes/Index of Indexes 2026a.csv',
-      'https://martincking.github.io/Index-of-Indexes/Index of Indexes 2025b.csv',
-      'https://martincking.github.io/Index-of-Indexes/Index of Indexes 2025a.csv',      
-      'https://martincking.github.io/Index-of-Indexes/Index of Indexes 2024.csv'
-    ];
-    const URL_MAP_FILE   = 'https://martincking.github.io/Index-of-Indexes/URL.csv';
-    const AGENCY_MAP_FILE = 'https://martincking.github.io/Index-of-Indexes/Agencies.csv'; // same folder as others
+    // ========= CSV sources are loaded from a text file =========
+    // Create this file in the same folder:
+    // csv_sources.txt  (one URL per line; lines starting with # are ignored)
+    const CSV_SOURCE_LIST_FILE =
+      'https://martincking.github.io/Index-of-Indexes/csv_sources.txt';
+
+    
+    let CSV_SOURCES = [];
+
+    const URL_MAP_FILE    = 'https://martincking.github.io/Index-of-Indexes/URL.csv';
+    const AGENCY_MAP_FILE = 'https://martincking.github.io/Index-of-Indexes/Agencies.csv';
 
     let tableData = [];          // rows: [Date, Agency, Category, Title, Link?]
     let dateURLMapping = {};     // Date (exact string) -> URL
     let agencyURLMapping = {};   // Normalized Agency -> URL
-    let longestDateLength = 0;
 
     // Helpers
     const norm = s => String(s || '').toLowerCase().replace(/\s+/g,'');
@@ -162,10 +165,32 @@
       norm(row[0]).includes('date') &&
       norm(row[1]).includes('agency');
 
-    // Normalize agency names for robust matching
     const normAgency = s => String(s || '').trim().replace(/\s+/g,' ').toUpperCase();
 
     function loadCSVFiles() {
+      // 0) Load list of data CSVs from csv_sources.txt
+      fetch(encodeURI(`${CSV_SOURCE_LIST_FILE}?t=${Date.now()}`))
+        .then(res => {
+          if (!res.ok) throw new Error('csv_sources.txt not found');
+          return res.text();
+        })
+        .then(text => {
+          CSV_SOURCES = text
+            .replace(/\r/g, '')                // handle Windows CRLF
+            .split('\n')
+            .map(l => l.trim())
+            .filter(l => l && !l.startsWith('#'));
+
+          if (!CSV_SOURCES.length) CSV_SOURCES = [...FALLBACK_CSV_SOURCES];
+          fetchAgencyAndURLMaps();
+        })
+        .catch(() => {
+          CSV_SOURCES = [...FALLBACK_CSV_SOURCES];
+          fetchAgencyAndURLMaps();
+        });
+    }
+
+    function fetchAgencyAndURLMaps() {
       // 1) Load Agency -> URL map (don’t block the rest if it fails)
       fetch(encodeURI(`${AGENCY_MAP_FILE}?t=${Date.now()}`))
         .then(res => res.text())
@@ -178,7 +203,6 @@
                 const url = (row[1] || '').trim();
                 if (key && url) agencyURLMapping[key] = url;
               });
-              // console.log('Agencies mapped:', Object.keys(agencyURLMapping).length);
             },
             skipEmptyLines: true
           });
@@ -261,7 +285,7 @@
         return `<tr>
           <td>${copilot}</td>
           <td>${dateLink ? `<a href="${dateLink}" target="_blank" rel="noopener">${date}</a>` : date}</td>
-          <td><b>${aUrl ? `<a href="${aUrl}" target="_blank" rel="noopener">${agency}</b></a>` : agency}</td>
+          <td><b>${aUrl ? `<a href="${aUrl}" target="_blank" rel="noopener">${agency}</a>` : agency}</b></td>
           <td><b>${category}</b></td>
           <td>${titleLink}</td>
         </tr>`;
@@ -384,20 +408,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
