@@ -30,6 +30,13 @@
       width: 100vw;
       height: 100vh;
       background-color: black;
+      overflow: hidden;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 2;
     }
     .banner {
       display: flex;
@@ -44,11 +51,12 @@
       height: 60px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
+
     .banner img { height: 100%; margin-left: 0; margin-right: 10px; }
     .banner-text { flex-grow: 1; text-align: center; margin-right: 40px; }
 
     .container { padding: 0; margin: 10px; text-align: center; }
-    .table-container { width: 100%; overflow-x: auto; }
+    .table-container { width: 100%; overflow-x: auto; max-height: calc(100vh - 210px); overflow-y: auto;}
     table { width: 100%; table-layout: auto; border-collapse: collapse; }
     th, td {
       padding: 10px; text-align: left; border: 1px solid #ddd;
