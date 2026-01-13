@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Index of Indexes Search</title>
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Index of Indexes Search">
+  <meta property="og:description" content="Search Quality Assurance & Regulatory Affairs News from LinkedIn QARA Group">
+  <meta property="og:image" content="https://martincking.github.io/Index-of-Indexes/screenshot.png">
+  <meta property="og:url" content="https://martincking.github.io/Index-of-Indexes/index.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="QARA.png" type="image/png"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet"/>
+
+  <style>
+    .copyright-notice {
+      font-size: 0.6em;
+      top: 0px;
+      padding: 0px;
+      border-radius: 10px;
+      background-color: black;
+      color: white;
+      text-align: center;
+    }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      width: 100vw;
+      height: 100vh;
+      background-color: black;
+      overflow: hidden; /* keep page fixed; table scrolls */
+    }
+
+    .banner {
+      display: flex;
+      align-items: center;
+      background-color: white;
+      font-size: 24px;
+      font-weight: bold;
+      color: red;
+      margin: 0 auto 0px;
+      width: 100%;
+      max-width: 700px;
+      height: 60px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    .banner img { height: 100%; margin-left: 0; margin-right: 10px; }
+    .banner-text { flex-grow: 1; text-align: center; margin-right: 40px; }
+
+    .container { padding: 0; margin:2px 10px 0; text-align: center; }
+
+    /* Controls row (start/end) */
+    .range-controls {
+      max-width: 700px;
+      margin: 6px auto;
+      color: white;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 0 10px;
+    }
+    .range-controls label { font-size: 12px; }
+    .range-controls input[type="date"] {
+      font-size: 12px;
+      padding: 4px 6px;
+    }
+    .range-controls button {
+      font-size: 12px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: calc(100vh - 180px); /* spaces matter in calc() */
+      padding: 0 0px 0px;
+      box-sizing: border-box;
+    }
+
+    table { width: 100%; table-layout: auto; border-collapse: collapse; }
+    th, td {
+      padding: 10px; text-align: left; border: 1px solid #ddd;
+      vertical-align: top; overflow: hidden;
+    }
+    tr:nth-child(even) { background-color: #e6f2ff; }
+    tr:nth-child(odd) { background-color: #ffffff; }
+    th:nth-child(1), td:nth-child(1) { width: 100px; white-space: nowrap; }
+    th:nth-child(2), td:nth-child(2) { width: 1%; white-space: nowrap; }
+    th:nth-child(3), td:nth-child(3) { white-space: normal; word-wrap: break-word; }
+    th:nth-child(4), td:nth-child(4) { white-space: nowrap; width: 1%; }
+    th:nth-child(5), td:nth-child(5) { white-space: normal; line-height: 1.2em; text-align: left; vertical-align: top; }
+
+    .filter-select, #searchInput, .select2-container { width: 100%; font-family: inherit; font-size: 14px; }
+    .select2-container--default .select2-selection--single .select2-selection__rendered,
+    .select2-selection__choice { font-weight: normal !important; font-size: 12px !important; }
+    .select2-dropdown .select2-results__options { font-size: 12px; }
+
+    .main-title span { font-size: 24px; font-weight: bold; }
+    .main-title span.blue { color: #0778AB; }
+    .main-title span:not(.blue) { color: #FBBB6A; }
+    h1 { font-size: 24px; font-weight: bold; text-align: center; margin-top: 0px; color: white; }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 2;
+    }
+
+    @media screen and (max-width: 600px) {
+      th:nth-child(3), td:nth-child(3),
+      th:nth-child(4), td:nth-child(4) { display: none; }
+      th, td { font-size: 12px; padding: 6px; }
+      .filter-select, #searchInput, .select2-selection { font-size: 12px; }
+      table { width: 100%; }
+      h1 { font-size: 18px; }
+      .table-container { max-height: calc(100vh - 320px); }
+    }
+  </style>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-81366NTXDQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date()); gtag('config', 'G-81366NTXDQ');
+  </script>
+
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)}
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "po84md6uax");
+  </script>
+
+  <!-- libs -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+
+<body style="background-color: black;">
+ 
+  <div class="container">
+    <div class="banner">
+      <img src="https://martincking.github.io/Index-of-Indexes/Swissflag.png" alt="Swiss Flag">
+      <div class="banner-text">REGULATORY ROUNDUP</div>
+    </div>
+    <div class="main-title"><span>MedTech </span><span class="blue">Leading</span> <span>Voice</span></div>
+    <h1>Regulatory Roundup Index Search <span id="entryCount"></span></h1>
+  </div>
+
+  <!-- Start/End controls -->
+  <div class="range-controls">
+    <label>Start:
+      <input type="date" id="startDate" onchange="filterTable()">
+    </label>
+    <label>End:
+      <input type="date" id="endDate" onchange="filterTable()">
+    </label>
+    <button onclick="clearDateRange()">Clear</button>
+  </div>
+
+  <div class="copyright-notice">
+    &copy;2026 Martin King. All rights reserved. The HTML, CSS, and JavaScript code used are protected under copyright law.
+  </div>
+
+  <div class="table-container">
+    <table id="csvTable">
+      <thead>
+        <tr>
+          <th>Copilot</th>
+          <th id="dateColumn">Date
+            <div><select id="dateFilter" class="filter-select" multiple onchange="filterTable()"></select></div>
+          </th>
+          <th>Agency
+            <div><select id="agencyFilter" class="filter-select" onchange="filterTable()"></select></div>
+          </th>
+          <th>Category
+            <div><select id="categoryFilter" class="filter-select" onchange="filterTable()"></select></div>
+          </th>
+          <th>Title
+            <div><input type="text" id="searchInput" class="filter-select" onkeyup="filterTable()" placeholder="Keyword Search Title.."></div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    // ========= CSV sources are loaded from a text file =========
+    // Create this file in the same folder:
+    // csv_sources.txt  (one URL per line; lines starting with # are ignored)
+    const CSV_SOURCE_LIST_FILE =
+      'https://martincking.github.io/Index-of-Indexes/csv_sources.txt';
+
+    // Fallback list (optional) — if you have one elsewhere, keep it.
+    // If not, leave as empty array.
+    const FALLBACK_CSV_SOURCES = [];
+
+    let CSV_SOURCES = [];
+
+    const URL_MAP_FILE    = 'https://martincking.github.io/Index-of-Indexes/URL.csv';
+    const AGENCY_MAP_FILE = 'https://martincking.github.io/Index-of-Indexes/Agencies.csv';
+
+    let tableData = [];          // rows: [Date, Agency, Category, Title, Link?]
+    let dateURLMapping = {};     // Date (exact string) -> URL
+    let agencyURLMapping = {};   // Normalized Agency -> URL
+
+    // Helpers
+    const norm = s => String(s || '').toLowerCase().replace(/\s+/g,'');
+    const looksLikeHeader = row =>
+      row && row.length >= 4 &&
+      norm(row[0]).includes('date') &&
+      norm(row[1]).includes('agency');
+
+    const normAgency = s => String(s || '').trim().replace(/\s+/g,' ').toUpperCase();
+
+    // --------------------------
+    // Date parsing for range filter
+    // --------------------------
+    function parseRowDate(raw) {
+      if (!raw) return null;
+
+      // Many browsers can parse ISO-like strings directly
+      let d = new Date(raw);
+      if (!isNaN(d)) return d;
+
+      // dd.mm.yyyy or dd/mm/yyyy
+      const m = String(raw).trim().match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})$/);
+      if (m) {
+        const dd = parseInt(m[1], 10);
+        const mm = parseInt(m[2], 10) - 1;
+        let yy = parseInt(m[3], 10);
+        if (yy < 100) yy += 2000;
+        d = new Date(yy, mm, dd);
+        if (!isNaN(d)) return d;
+      }
+
+      // "2 August 2024" etc.
+      d = new Date(Date.parse(raw));
+      return isNaN(d) ? null : d;
+    }
+
+    function getRangeBounds() {
+      const s = document.getElementById("startDate").value; // yyyy-mm-dd or ""
+      const e = document.getElementById("endDate").value;
+      const start = s ? new Date(s + "T00:00:00") : null;
+      const end   = e ? new Date(e + "T23:59:59") : null;
+      return { start, end };
+    }
+
+    function clearDateRange() {
+      document.getElementById("startDate").value = "";
+      document.getElementById("endDate").value = "";
+      filterTable();
+    }
+
+    // --------------------------
+    // Load & build data
+    // --------------------------
+    function loadCSVFiles() {
+      fetch(encodeURI(`${CSV_SOURCE_LIST_FILE}?t=${Date.now()}`))
+        .then(res => {
+          if (!res.ok) throw new Error('csv_sources.txt not found');
+          return res.text();
+        })
+        .then(text => {
+          CSV_SOURCES = text
+            .replace(/\r/g, '')
+            .split('\n')
+            .map(l => l.trim())
+            .filter(l => l && !l.startsWith('#'));
+
+          if (!CSV_SOURCES.length) CSV_SOURCES = [...FALLBACK_CSV_SOURCES];
+          fetchAgencyAndURLMaps();
+        })
+        .catch(() => {
+          CSV_SOURCES = [...FALLBACK_CSV_SOURCES];
+          fetchAgencyAndURLMaps();
+        });
+    }
+
+    function fetchAgencyAndURLMaps() {
+      fetch(encodeURI(`${AGENCY_MAP_FILE}?t=${Date.now()}`))
+        .then(res => res.text())
+        .then(text => {
+          Papa.parse(text, {
+            complete: results => {
+              results.data.forEach((row, i) => {
+                if (i === 0 && String(row[0]).toLowerCase().includes('agency')) return;
+                const key = normAgency(row[0]);
+                const url = (row[1] || '').trim();
+                if (key && url) agencyURLMapping[key] = url;
+              });
+            },
+            skipEmptyLines: true
+          });
+        })
+        .catch(() => { /* ignore */ })
+        .finally(() => {
+          fetch(encodeURI(`${URL_MAP_FILE}?t=${Date.now()}`))
+            .then(res => res.text())
+            .then(text => {
+              Papa.parse(text, {
+                complete: results => {
+                  results.data.forEach((row, i) => {
+                    if (i === 0 && String(row[0]).toLowerCase().includes('date')) return;
+                    const date = (row[0] == null) ? '' : String(row[0]);
+                    const url  = (row[1] || '').trim();
+                    if (date && url) dateURLMapping[date] = url;
+                  });
+                  fetchAndCombineDataCSVs();
+                },
+                skipEmptyLines: true
+              });
+            })
+            .catch(() => fetchAndCombineDataCSVs());
+        });
+    }
+
+    function fetchAndCombineDataCSVs() {
+      Promise.all(
+        CSV_SOURCES.map(src => fetch(encodeURI(src)).then(r => r.text()))
+      ).then(texts => {
+        let merged = [];
+        texts.forEach(txt => {
+          const parsed = Papa.parse(txt, { skipEmptyLines: true }).data;
+          const rowsOnly = (parsed.length && looksLikeHeader(parsed[0])) ? parsed.slice(1) : parsed;
+
+          rowsOnly.forEach(r => {
+            if (!r || r.every(cell => !cell)) return;
+            // Expected: Date, Agency, Category, Title[, Link]
+            const date     = (r[0] == null) ? '' : String(r[0]);
+            const agency   = (r[1] || '').trim();
+            const category = (r[2] || '').trim();
+            const title    = (r[3] || '').trim();
+            const link     = (r[4] || '').trim();
+
+            if (date || agency || category || title) {
+              merged.push([date, agency, category, title, link]);
+            }
+          });
+        });
+
+        tableData = merged;
+        renderTable(tableData);
+        populateFilters(tableData);
+        adjustDateColumnWidth(tableData);
+
+        setTimeout(applyURLFilters, 100);
+      });
+    }
+
+    // --------------------------
+    // Render
+    // --------------------------
+    function renderTable(data) {
+      const tableBody = document.getElementById('tableBody');
+      tableBody.innerHTML = data.map(row => {
+        const [date, agency, category, title, link] = row;
+
+        // Title hyperlink priority: direct Link column if starts with http; else plain text
+        const titleLink = (link && /^https?:\/\//i.test(link))
+          ? `<a href="${link}" target="_blank" rel="noopener">${title || link}</a>`
+          : title;
+
+        // Date hyperlink via URL.csv mapping — exact match
+        const dateLink = dateURLMapping[date];
+
+        // Agency hyperlink via Agencies.csv mapping — normalized match
+        const aUrl = agencyURLMapping[normAgency(agency)];
+
+        // CoPilot (Bing) link built from Agency + Category + Title
+        const query = encodeURIComponent(`${agency} ${category} ${title}`);
+        const copilot = `<a href="https://www.bing.com/copilotsearch?q=${query}&showconv=1" target="_blank" rel="noopener">Copilot</a>`;
+
+        return `<tr>
+          <td>${copilot}</td>
+          <td>${dateLink ? `<a href="${dateLink}" target="_blank" rel="noopener">${date}</a>` : date}</td>
+          <td><b>${aUrl ? `<a href="${aUrl}" target="_blank" rel="noopener">${agency}</a>` : agency}</b></td>
+          <td><b>${category}</b></td>
+          <td>${titleLink}</td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('entryCount').textContent = `(${data.length.toLocaleString()} entries)`;
+    }
+
+    // --------------------------
+    // Filtering (includes date range)
+    // --------------------------
+    function filterTable() {
+      const selectedDates = $('#dateFilter').val() || [];
+      const agency = (document.getElementById('agencyFilter').value || '').toUpperCase();
+      const category = (document.getElementById('categoryFilter').value || '').toUpperCase();
+      const titleSearch = (document.getElementById('searchInput').value || '').toUpperCase();
+
+      const { start, end } = getRangeBounds();
+
+      const filtered = tableData.filter(row => {
+        const [date, a, c, t] = row;
+
+        // Existing exact-date multi-select
+        const exactOk = (!selectedDates.length || selectedDates.includes(date));
+
+        // New date range
+        let rangeOk = true;
+        if (start || end) {
+          const rd = parseRowDate(date);
+          if (!rd) rangeOk = false;
+          if (start && rd && rd < start) rangeOk = false;
+          if (end && rd && rd > end) rangeOk = false;
+        }
+
+        return exactOk &&
+               rangeOk &&
+               (!agency || (a || '').toUpperCase() === agency) &&
+               (!category || (c || '').toUpperCase() === category) &&
+               (!titleSearch || (t || '').toUpperCase().includes(titleSearch));
+      });
+
+      renderTable(filtered);
+    }
+
+    // --------------------------
+    // Dropdowns
+    // --------------------------
+    function populateFilters(data) {
+      const dateSet = new Set(), agencySet = new Set(), categorySet = new Set();
+      data.forEach(row => {
+        const [date, agency, category] = row;
+        if (date) dateSet.add(date);
+        if (agency) agencySet.add(agency);
+        if (category) categorySet.add(category);
+      });
+      createDropdown('dateFilter', [...dateSet], true);
+      createDropdown('agencyFilter', [...agencySet].sort());
+      createDropdown('categoryFilter', [...categorySet].sort());
+    }
+
+    function createDropdown(id, items, multiple = false) {
+      const el = document.getElementById(id);
+      el.innerHTML = multiple ? '' : `<option value="">Select ${id.replace('Filter','')}</option>`;
+      items.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.textContent = item;
+        el.appendChild(opt);
+      });
+      $(`#${id}`).val(null).select2({
+        placeholder: `Select ${id.replace('Filter','')}`,
+        allowClear: true,
+        multiple,
+        width: '100%'
+      });
+    }
+
+    function adjustDateColumnWidth(data) {
+      const col = document.getElementById('dateColumn');
+      const max = data.reduce((a, b) => (String(a[0]||'').length > String(b[0]||'').length ? a : b), ['']);
+      col.style.width = `${String(max[0]||'').length * 10}px`;
+    }
+
+    // --------------------------
+    // URL params (start/end + existing)
+    // --------------------------
+    function getQueryParams() {
+      return Object.fromEntries(new URLSearchParams(window.location.search).entries());
+    }
+
+    function applyURLFilters() {
+      const params = getQueryParams();
+
+      // start/end (YYYY-MM-DD)
+      if (params.start) document.getElementById("startDate").value = params.start;
+      if (params.end)   document.getElementById("endDate").value   = params.end;
+
+      // existing ones
+      if (params.date) {
+        const raw = params.date.split(',');
+        $('#dateFilter').val(raw).trigger('change');
+      }
+      if (params.agency)   $('#agencyFilter').val(params.agency).trigger('change');
+      if (params.category) $('#categoryFilter').val(params.category).trigger('change');
+      if (params.title || params.search)
+        document.getElementById('searchInput').value = params.title || params.search;
+
+      filterTable();
+    }
+
+    window.onload = loadCSVFiles;
+  </script>
+
+  <!-- Cookie Consent Popup -->
+  <div id="cookie-popup" style="position:fixed;bottom:20px;left:20px;right:20px;background:#fff;border:1px solid #ccc;padding:20px;z-index:9999;font-family:sans-serif;">
+    <p>Cookies are used to improve your experience and analyze site usage. By clicking “Accept,” you agree to our use of cookies for analytics.</p>
+    <button id="accept-cookies" style="margin-right:10px;">Accept</button>
+    <button id="decline-cookies">Decline</button>
+  </div>
+
+  <script>
+    // Check stored consent on page load
+    const storedConsent = localStorage.getItem("cookieConsent");
+    if (storedConsent) {
+      document.getElementById("cookie-popup").style.display = "none";
+      if (window.clarity) {
+        window.clarity('consentv2', {
+          ad_storage: storedConsent,
+          analytics_storage: storedConsent
+        });
+      }
+    }
+
+    // Handle Accept
+    document.getElementById("accept-cookies").onclick = function() {
+      if (window.clarity) {
+        window.clarity('consentv2', { ad_storage: "granted", analytics_storage: "granted" });
+      }
+      localStorage.setItem("cookieConsent", "granted");
+      document.getElementById("cookie-popup").style.display = "none";
+    };
+
+    // Handle Decline
+    document.getElementById("decline-cookies").onclick = function() {
+      if (window.clarity) {
+        window.clarity('consentv2', { ad_storage: "denied", analytics_storage: "denied" });
+      }
+      localStorage.setItem("cookieConsent", "denied");
+      document.getElementById("cookie-popup").style.display = "none";
+    };
+  </script>
+</body>
+</html>
