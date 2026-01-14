@@ -78,7 +78,7 @@
       width: 100%;
       overflow-x: auto;
       overflow-y: auto;
-      max-height: calc(100vh - 180px); /* spaces matter in calc() */
+      max-height: calc(100vh - 180px);
       padding: 0 0px 0px;
       box-sizing: border-box;
     }
@@ -148,7 +148,7 @@
 </head>
 
 <body style="background-color: black;">
- 
+
   <div class="container">
     <div class="banner">
       <img src="https://martincking.github.io/Index-of-Indexes/Swissflag.png" alt="Swiss Flag">
@@ -198,15 +198,10 @@
 
   <script>
     // ========= CSV sources are loaded from a text file =========
-    // Create this file in the same folder:
-    // csv_sources.txt  (one URL per line; lines starting with # are ignored)
     const CSV_SOURCE_LIST_FILE =
       'https://martincking.github.io/Index-of-Indexes/csv_sources.txt';
 
-    // Fallback list (optional) — if you have one elsewhere, keep it.
-    // If not, leave as empty array.
     const FALLBACK_CSV_SOURCES = [];
-
     let CSV_SOURCES = [];
 
     const URL_MAP_FILE    = 'https://martincking.github.io/Index-of-Indexes/URL.csv';
@@ -215,6 +210,11 @@
     let tableData = [];          // rows: [Date, Agency, Category, Title, Link?]
     let dateURLMapping = {};     // Date (exact string) -> URL
     let agencyURLMapping = {};   // Normalized Agency -> URL
+
+    // Default order when only one of start/end is set (or neither).
+    // If both start+end are set, we dynamically flip based on start<=end.
+    // "desc" = newest first, "asc" = oldest first
+    const DEFAULT_SORT_ORDER = "desc";
 
     // Helpers
     const norm = s => String(s || '').toLowerCase().replace(/\s+/g,'');
@@ -226,16 +226,16 @@
     const normAgency = s => String(s || '').trim().replace(/\s+/g,' ').toUpperCase();
 
     // --------------------------
-    // Date parsing for range filter
+    // Date parsing for range filter + sorting
     // --------------------------
     function parseRowDate(raw) {
       if (!raw) return null;
 
-      // Many browsers can parse ISO-like strings directly
+      // ISO-like
       let d = new Date(raw);
       if (!isNaN(d)) return d;
 
-      // dd.mm.yyyy or dd/mm/yyyy
+      // dd.mm.yyyy or dd/mm/yyyy or dd-mm-yyyy
       const m = String(raw).trim().match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})$/);
       if (m) {
         const dd = parseInt(m[1], 10);
@@ -254,9 +254,43 @@
     function getRangeBounds() {
       const s = document.getElementById("startDate").value; // yyyy-mm-dd or ""
       const e = document.getElementById("endDate").value;
-      const start = s ? new Date(s + "T00:00:00") : null;
-      const end   = e ? new Date(e + "T23:59:59") : null;
+
+      let start = s ? new Date(s + "T00:00:00") : null;
+      let end   = e ? new Date(e + "T00:00:00") : null;
+
+      // ✅ If user enters reverse range, swap the bounds for filtering
+      if (start && end && start > end) {
+      const tmp = start;
+      start = end;
+      end = tmp;
+      }
       return { start, end };
+    }
+
+    // ✅ Dynamic sort order:
+    // - If BOTH start and end are set:
+    //     start <= end  => chronological (asc)
+    //     start >  end  => reverse chronological (desc)
+    // - Otherwise use DEFAULT_SORT_ORDER.
+    function getDynamicSortOrder() {
+      const s = document.getElementById("startDate").value;
+      const e = document.getElementById("endDate").value;
+      if (!s || !e) return DEFAULT_SORT_ORDER;
+      return (new Date(s) <= new Date(e)) ? "asc" : "desc";
+    }
+
+    function compareByDate(aRow, bRow) {
+      const da = parseRowDate(aRow[0]);
+      const db = parseRowDate(bRow[0]);
+
+      // push unparseable dates to the bottom
+      if (!da && !db) return 0;
+      if (!da) return 1;
+      if (!db) return -1;
+
+      const diff = da - db; // ascending
+      const order = getDynamicSortOrder();
+      return (order === "asc") ? diff : -diff;
     }
 
     function clearDateRange() {
@@ -352,7 +386,11 @@
           });
         });
 
+        // ✅ Sort once at load using current dynamic order (usually DEFAULT_SORT_ORDER)
+        merged.sort(compareByDate);
+
         tableData = merged;
+
         renderTable(tableData);
         populateFilters(tableData);
         adjustDateColumnWidth(tableData);
@@ -369,18 +407,13 @@
       tableBody.innerHTML = data.map(row => {
         const [date, agency, category, title, link] = row;
 
-        // Title hyperlink priority: direct Link column if starts with http; else plain text
         const titleLink = (link && /^https?:\/\//i.test(link))
           ? `<a href="${link}" target="_blank" rel="noopener">${title || link}</a>`
           : title;
 
-        // Date hyperlink via URL.csv mapping — exact match
         const dateLink = dateURLMapping[date];
-
-        // Agency hyperlink via Agencies.csv mapping — normalized match
         const aUrl = agencyURLMapping[normAgency(agency)];
 
-        // CoPilot (Bing) link built from Agency + Category + Title
         const query = encodeURIComponent(`${agency} ${category} ${title}`);
         const copilot = `<a href="https://www.bing.com/copilotsearch?q=${query}&showconv=1" target="_blank" rel="noopener">Copilot</a>`;
 
@@ -410,10 +443,8 @@
       const filtered = tableData.filter(row => {
         const [date, a, c, t] = row;
 
-        // Existing exact-date multi-select
         const exactOk = (!selectedDates.length || selectedDates.includes(date));
 
-        // New date range
         let rangeOk = true;
         if (start || end) {
           const rd = parseRowDate(date);
@@ -429,6 +460,9 @@
                (!titleSearch || (t || '').toUpperCase().includes(titleSearch));
       });
 
+      // ✅ Keep the filtered view sorted with dynamic order
+      filtered.sort(compareByDate);
+
       renderTable(filtered);
     }
 
@@ -443,7 +477,11 @@
         if (agency) agencySet.add(agency);
         if (category) categorySet.add(category);
       });
-      createDropdown('dateFilter', [...dateSet], true);
+
+      // ✅ Date dropdown sorted the same way as current dynamic order
+      const dateList = [...dateSet].sort((a, b) => compareByDate([a], [b]));
+
+      createDropdown('dateFilter', dateList, true);
       createDropdown('agencyFilter', [...agencySet].sort());
       createDropdown('categoryFilter', [...categorySet].sort());
     }
@@ -481,11 +519,9 @@
     function applyURLFilters() {
       const params = getQueryParams();
 
-      // start/end (YYYY-MM-DD)
       if (params.start) document.getElementById("startDate").value = params.start;
       if (params.end)   document.getElementById("endDate").value   = params.end;
 
-      // existing ones
       if (params.date) {
         const raw = params.date.split(',');
         $('#dateFilter').val(raw).trigger('change');
@@ -495,7 +531,11 @@
       if (params.title || params.search)
         document.getElementById('searchInput').value = params.title || params.search;
 
+      // Re-render after params; dynamic sort order may flip here
       filterTable();
+
+      // Keep date dropdown order consistent with final dynamic order
+      populateFilters(tableData);
     }
 
     window.onload = loadCSVFiles;
@@ -509,7 +549,6 @@
   </div>
 
   <script>
-    // Check stored consent on page load
     const storedConsent = localStorage.getItem("cookieConsent");
     if (storedConsent) {
       document.getElementById("cookie-popup").style.display = "none";
@@ -521,7 +560,6 @@
       }
     }
 
-    // Handle Accept
     document.getElementById("accept-cookies").onclick = function() {
       if (window.clarity) {
         window.clarity('consentv2', { ad_storage: "granted", analytics_storage: "granted" });
@@ -530,7 +568,6 @@
       document.getElementById("cookie-popup").style.display = "none";
     };
 
-    // Handle Decline
     document.getElementById("decline-cookies").onclick = function() {
       if (window.clarity) {
         window.clarity('consentv2', { ad_storage: "denied", analytics_storage: "denied" });
