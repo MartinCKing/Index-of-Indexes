@@ -86,6 +86,27 @@
       table { width: 100%; }
       h1 { font-size: 18px; }
     }
+      .libutton {
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+  font-size: 0.6em;   /* try 0.4–0.5 */
+  padding: 6px 12px;
+  line-height: 1;
+        text-align: center;
+        align-items: center;
+        outline: none;
+        text-decoration: none !important;
+        color: #ffffff !important;
+        width: 300 px;
+        height: 200 px;
+        border-radius: 16px;
+        background-color: #0A66C2;
+        font-family: "SF Pro Text", Helvetica, sans-serif;
+        white-space: nowrap;
+       }
+
+
   </style>
 
   <!-- Google Analytics -->
@@ -113,15 +134,27 @@
 
 <body style="background-color: black;">
   <p>Regulatory Roundup Index Search<a href="https://martincking.github.io/Index-of-Indexes/"></a>.</p>
-  <div class="container">
-    <div class="banner">
-      <img src="Swissflag.png" alt="Swiss Flag">
-      <div class="banner-text">REGULATORY ROUNDUP</div>
-    </div>
-    <div class="main-title"><span>MedTech </span><span class="blue">Leading</span> <span>Voice</span></div>
-    <h1>Regulatory Roundup Index Search <span id="entryCount"></span></h1>
+<div class="container">
+  <div class="banner">
+    <img src="Swissflag.png" alt="Swiss Flag">
+    <div class="banner-text">REGULATORY ROUNDUP</div>
   </div>
 
+  <div class="main-title"><span>MedTech </span><span class="blue">Leading</span> <span>Voice</span></div>
+
+<div class="title-row">
+  <div class="title-inline">
+    <h1>
+      Regulatory Roundup Index Search
+      <span id="entryCount"></span>
+      <a class="libutton"
+         href="https://www.linkedin.com/build-relation/newsletter-follow?entityUrn=7416543361140056064"
+         target="_blank" rel="noopener">
+        Subscribe on LinkedIn
+      </a>
+    </h1>
+  </div>
+</div>
   <div class="copyright-notice">
     &copy;2026 Martin King. All rights reserved. The HTML, CSS, and JavaScript code used are protected under copyright law.
   </div>
