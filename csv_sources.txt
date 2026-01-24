@@ -1,6 +1,7 @@
 https://martincking.github.io/Index-of-Indexes/news.csv
-https://martincking.github.io/Index-of-Indexes/Index of Indexes 2026a.csv
-https://martincking.github.io/Index-of-Indexes/Index of Indexes 2025b.csv
-https://martincking.github.io/Index-of-Indexes/Index of Indexes 2025a.csv
-https://martincking.github.io/Index-of-Indexes/Index of Indexes 2024.csv
+https://martincking.github.io/Index-of-Indexes/Index_of_Indexes_2026a.csv
+https://martincking.github.io/Index-of-Indexes/Index_of_Indexes_2025b.csv
+https://martincking.github.io/Index-of-Indexes/Index_of_Indexes_2025a.csv
+https://martincking.github.io/Index-of-Indexes/Index_of_Indexes_2024.csv
 https://martincking.github.io/Index-of-Indexes/medtech_leading_voice_newsletters.csv
+
