@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Regulatory Roundup AI Skills Pack Generator</title>
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Regulatory Roundup AI Skills Pack Generator">
+  <meta property="og:description" content="Regulatory Roundup AI Skills Pack Generator">
+  <meta property="og:url" content="https://martincking.github.io/Index-of-Indexes/index.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="https://martincking.github.io/QARA.png" type="image/png"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet"/>
+
+  <style>
+    .copyright-notice {
+      font-size: 0.6em;
+      top: 0px;
+      padding: 0px;
+      border-radius: 10px;
+      background-color: black;
+      color: white;
+      text-align: center;
+    }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      width: 100vw;
+      height: 100vh;
+      background-color: black;
+      overflow: hidden;
+    }
+    thead th {
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 2;
+    }
+    .banner {
+      display: flex;
+      align-items: center;
+      background-color: white;
+      font-size: 24px;
+      font-weight: bold;
+      color: red;
+      margin: 0 auto 20px;
+      width: 100%;
+      max-width: 700px;
+      height: 60px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .banner img { height: 100%; margin-left: 0; margin-right: 10px; }
+    .banner-text { flex-grow: 1; text-align: center; margin-right: 40px; }
+
+    .container { padding: 0; margin: 10px; text-align: center; }
+    .table-container { width: 100%; overflow-x: auto; max-height: calc(100vh - 210px); overflow-y: auto;}
+    table { width: 100%; table-layout: auto; border-collapse: collapse; }
+    th, td {
+      padding: 10px; text-align: left; border: 1px solid #ddd;
+      vertical-align: top; overflow: hidden;
+    }
+    tr:nth-child(even) { background-color: #e6f2ff; }
+    tr:nth-child(odd) { background-color: #ffffff; }
+    th:nth-child(1), td:nth-child(1) { width: 100px; white-space: nowrap; }
+    th:nth-child(2), td:nth-child(2) { width: 1%; white-space: nowrap; }
+    th:nth-child(3), td:nth-child(3) { white-space: normal; word-wrap: break-word; }
+    th:nth-child(4), td:nth-child(4) { white-space: nowrap; width: 1%; }
+    th:nth-child(5), td:nth-child(5) { white-space: normal; line-height: 1.2em; text-align: left; vertical-align: top; }
+    .filter-select, #searchInput, .select2-container { width: 100%; font-family: inherit; font-size: 14px; }
+    .select2-container--default .select2-selection--single .select2-selection__rendered,
+    .select2-selection__choice { font-weight: normal !important; font-size: 12px !important; }
+    .select2-dropdown .select2-results__options { font-size: 12px; }
+    .main-title span { font-size: 24px; font-weight: bold; }
+    .main-title span.blue { color: #0778AB; }
+    .main-title span:not(.blue) { color: #FBBB6A; }
+    h1 { font-size: 24px; font-weight: bold; text-align: center; margin-top: 0px; color: white; }
+
+    @media screen and (max-width: 600px) {
+      th:nth-child(3), td:nth-child(3),
+      th:nth-child(4), td:nth-child(4) { display: none; }
+      th, td { font-size: 12px; padding: 6px; }
+      .filter-select, #searchInput, .select2-selection { font-size: 12px; }
+      table { width: 100%; }
+      h1 { font-size: 18px; }
+    }
+      .libutton {
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+  font-size: 0.6em;   /* try 0.4–0.5 */
+  padding: 6px 12px;
+  line-height: 1;
+        text-align: center;
+        align-items: center;
+        outline: none;
+        text-decoration: none !important;
+        color: #ffffff !important;
+        width: 300 px;
+        height: 200 px;
+        border-radius: 16px;
+        background-color: #0A66C2;
+        font-family: "SF Pro Text", Helvetica, sans-serif;
+        white-space: nowrap;
+       }
+
+
+  </style>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-81366NTXDQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date()); gtag('config', 'G-81366NTXDQ');
+  </script>
+
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)}
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "po84md6uax");
+  </script>
+
+  <!-- libs -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+
+<body style="background-color: black;">
+  <p>Regulatory Roundup Index Search<a href="https://martincking.github.io/Index-of-Indexes/"></a>.</p>
+<div class="container">
+  <div class="banner">
+    <img src="https://martincking.github.io/Index-of-Indexes/Swissflag.png" alt="Swiss Flag">
+    <div class="banner-text">REGULATORY ROUNDUP</div>
+  </div>
+
+  <div class="main-title"><span>MedTech </span><span class="blue">Leading</span> <span>Voice</span></div>
+
+<div class="title-row">
+  <div class="title-inline">
+    <h1>
+      AI Skills Pack Generator
+    </h1>
+  </div>
+</div>
+  <div class="copyright-notice">
+    &copy;2026 Martin King. All rights reserved. The HTML, CSS, and JavaScript code used are protected under copyright law.
+  </div>
+</body>
+</html>
