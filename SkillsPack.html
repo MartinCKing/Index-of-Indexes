@@ -2,167 +2,361 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Regulatory Roundup AI Skills Pack Generator</title>
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Regulatory Roundup AI Skills Pack Generator">
-  <meta property="og:description" content="Regulatory Roundup AI Skills Pack Generator">
-  <meta property="og:url" content="https://martincking.github.io/Index-of-Indexes/index.html">
+  <title>Prompt to Generate Your Own AI Skills Pack</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" href="https://martincking.github.io/QARA.png" type="image/png"/>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet"/>
 
   <style>
-    .copyright-notice {
-      font-size: 0.6em;
-      top: 0px;
-      padding: 0px;
-      border-radius: 10px;
-      background-color: black;
-      color: white;
-      text-align: center;
-    }
     body {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      width: 100vw;
-      height: 100vh;
-      background-color: black;
-      overflow: hidden;
+      background: #000;
+      color: #fff;
     }
-    thead th {
-      position: sticky;
-      top: 0;
-      background: white;
-      z-index: 2;
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 12px;
+      text-align: center;
     }
+
     .banner {
       display: flex;
       align-items: center;
       background-color: white;
+      color: red;
       font-size: 24px;
       font-weight: bold;
-      color: red;
       margin: 0 auto 20px;
-      width: 100%;
       max-width: 700px;
       height: 60px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    .banner img { height: 100%; margin-left: 0; margin-right: 10px; }
-    .banner-text { flex-grow: 1; text-align: center; margin-right: 40px; }
-
-    .container { padding: 0; margin: 10px; text-align: center; }
-    .table-container { width: 100%; overflow-x: auto; max-height: calc(100vh - 210px); overflow-y: auto;}
-    table { width: 100%; table-layout: auto; border-collapse: collapse; }
-    th, td {
-      padding: 10px; text-align: left; border: 1px solid #ddd;
-      vertical-align: top; overflow: hidden;
+    .banner img {
+      height: 100%;
+      margin-right: 10px;
     }
-    tr:nth-child(even) { background-color: #e6f2ff; }
-    tr:nth-child(odd) { background-color: #ffffff; }
-    th:nth-child(1), td:nth-child(1) { width: 100px; white-space: nowrap; }
-    th:nth-child(2), td:nth-child(2) { width: 1%; white-space: nowrap; }
-    th:nth-child(3), td:nth-child(3) { white-space: normal; word-wrap: break-word; }
-    th:nth-child(4), td:nth-child(4) { white-space: nowrap; width: 1%; }
-    th:nth-child(5), td:nth-child(5) { white-space: normal; line-height: 1.2em; text-align: left; vertical-align: top; }
-    .filter-select, #searchInput, .select2-container { width: 100%; font-family: inherit; font-size: 14px; }
-    .select2-container--default .select2-selection--single .select2-selection__rendered,
-    .select2-selection__choice { font-weight: normal !important; font-size: 12px !important; }
-    .select2-dropdown .select2-results__options { font-size: 12px; }
-    .main-title span { font-size: 24px; font-weight: bold; }
-    .main-title span.blue { color: #0778AB; }
-    .main-title span:not(.blue) { color: #FBBB6A; }
-    h1 { font-size: 24px; font-weight: bold; text-align: center; margin-top: 0px; color: white; }
 
-    @media screen and (max-width: 600px) {
-      th:nth-child(3), td:nth-child(3),
-      th:nth-child(4), td:nth-child(4) { display: none; }
-      th, td { font-size: 12px; padding: 6px; }
-      .filter-select, #searchInput, .select2-selection { font-size: 12px; }
-      table { width: 100%; }
-      h1 { font-size: 18px; }
+    .banner-text {
+      flex-grow: 1;
+      text-align: center;
+      margin-right: 40px;
     }
-      .libutton {
-        display: inline-flex;
-        flex-direction: column;
-        justify-content: center;
-  font-size: 0.6em;   /* try 0.4–0.5 */
-  padding: 6px 12px;
-  line-height: 1;
-        text-align: center;
-        align-items: center;
-        outline: none;
-        text-decoration: none !important;
-        color: #ffffff !important;
-        width: 300 px;
-        height: 200 px;
-        border-radius: 16px;
-        background-color: #0A66C2;
-        font-family: "SF Pro Text", Helvetica, sans-serif;
-        white-space: nowrap;
-       }
 
+    h1 {
+      font-size: 24px;
+      margin: 10px 0;
+    }
 
+    .panel {
+      background: #111;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .lead {
+      color: #ddd;
+      line-height: 1.6;
+    }
+
+    .button-row {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      padding: 12px 18px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .primary {
+      background: #0A66C2;
+      color: white;
+    }
+
+    .secondary {
+      background: white;
+      color: black;
+    }
+
+    .workflow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+      align-items: center;
+    }
+
+    .step {
+      background: #0A66C2;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .arrow {
+      color: #888;
+    }
+
+    .preview {
+      margin-top: 20px;
+      background: #0d0d0d;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow: auto;
+    }
+
+    .status {
+      margin-top: 16px;
+      background: #1b1b1b;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #ddd;
+    }
   </style>
-
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-81366NTXDQ"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date()); gtag('config', 'G-81366NTXDQ');
-  </script>
-
-  <!-- Microsoft Clarity -->
-  <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)}
-      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "po84md6uax");
-  </script>
-
-  <!-- libs -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 </head>
 
-<body style="background-color: black;">
-  <p>Regulatory Roundup Index Search<a href="https://martincking.github.io/Index-of-Indexes/"></a>.</p>
-<div class="container">
-  <div class="banner">
-    <img src="https://martincking.github.io/Index-of-Indexes/Swissflag.png" alt="Swiss Flag">
-    <div class="banner-text">REGULATORY ROUNDUP</div>
+<body>
+  <div class="container">
+    <div class="banner">
+      <img src="https://martincking.github.io/Index-of-Indexes/Swissflag.png" alt="Swiss Flag">
+      <div class="banner-text">REGULATORY ROUNDUP</div>
+    </div>
+
+    <h1>Prompt to Generate Your Own AI Skills Pack</h1>
+
+    <div class="panel">
+      <p class="lead">
+        Download the prompt and load it into your LLM to generate your own AI Skills Pack.
+      </p>
+
+      <p class="lead">
+        Once generated, save the Skills Pack as a Markdown (.md) file, load it into your LLM, and follow the instructions to use your AI Skills.
+      </p>
+
+      <div class="workflow">
+        <div class="step">1. Download Prompt</div>
+        <div class="arrow">→</div>
+        <div class="step">2. Load into LLM</div>
+        <div class="arrow">→</div>
+        <div class="step">3. Paste Procedure</div>
+        <div class="arrow">→</div>
+        <div class="step">4. Generate Skills Pack</div>
+        <div class="arrow">→</div>
+        <div class="step">5. Save .md</div>
+        <div class="arrow">→</div>
+        <div class="step">6. Load Skills Pack into LLM</div>
+        <div class="arrow">→</div>
+        <div class="step">7. Use AI Skills</div>
+      </div>
+
+      <p class="lead" style="margin-top:20px;">
+        This tool does not process your document. It generates a reusable prompt. Your LLM performs the extraction.
+      </p>
+
+      <div class="button-row">
+        <button class="button primary" onclick="downloadPrompt()">Download Prompt (.md)</button>
+        <button class="button secondary" onclick="copyPrompt()">Copy Prompt</button>
+      </div>
+
+      <div class="status" id="status">Ready.</div>
+      <div class="preview" id="preview"></div>
+    </div>
   </div>
 
-  <div class="main-title"><span>MedTech </span><span class="blue">Leading</span> <span>Voice</span></div>
+<script>
 
-<div class="title-row">
-  <div class="title-inline">
-    <h1>
-      AI Skills Pack Generator
-    </h1>
-  </div>
-</div>
-  <div class="copyright-notice">
-    &copy;2026 Martin King. All rights reserved. The HTML, CSS, and JavaScript code used are protected under copyright law.
-  </div>
-<div style="color: white; max-width: 700px; margin: 20px auto; text-align: center;">
-  <p>You are operating inside the Regulatory Roundup AI Skills Pack Generator.</p>
-  <p>This is a controlled regulatory environment for MedTech.</p>
-</div>
-<div style="color: white; max-width: 700px; margin: 20px auto; text-align: Left;">
-  <p><strong>Rules:</strong></p>
-  <ul>
-    <li>Extract only information explicitly present in the source file</li>
-    <li>Do NOT infer or hallucinate</li>
-    <li>Return mark-up only</li>
-    <li>Generate exactly one skills pack</li>
-  </ul>
-</div>
+function buildPrompt() {
+  return `# ⚠️ EXECUTION MODE (OVERRIDE ALL DEFAULT BEHAVIOR)
+
+You are NOT allowed to explain, summarize, analyze, or describe this document.
+
+You are NOT allowed to interpret the content as a prompt description.
+
+You MUST execute the instructions in this document.
+
+If the content appears to be instructions, you must STILL execute it as a transformation task.
+
+---
+
+# EXECUTION MODE — AI SKILLS PACK GENERATOR (MARKDOWN OUTPUT)
+
+Load this prompt into any LLM to generate your own AI Skills Pack.
+
+Once you have created your Skills Pack:
+- Save it as a Markdown (.md) file
+- Load it into your LLM
+- Follow the instructions to use your AI Skills
+
+---
+
+## STRICT BEHAVIOR RULES
+
+- DO NOT explain anything
+- DO NOT summarize
+- DO NOT describe what this file is
+- DO NOT provide guidance
+- ONLY execute transformation
+
+---
+
+## MANDATORY RULES
+
+- Extract ONLY information explicitly present in the input
+- DO NOT infer, assume, or hallucinate
+- If information is missing → write: Not explicitly stated
+- Preserve exact procedure title including numbering and version
+- Generate exactly ONE Skills Pack
+- Output MUST be valid Markdown only
+
+---
+
+## ⚠️ REQUIRED USER ACTION (MANDATORY)
+
+You MUST replace the block below with the full procedure content before running this prompt.
+
+If you do NOT replace it, the output will contain only "Not explicitly stated".
+
+This is expected behavior and not an error.
+
+---
+
+## INPUT
+
+<<<REPLACE THIS ENTIRE BLOCK WITH YOUR FULL PROCEDURE TEXT>>>
+
+---
+
+## INPUT VALIDATION RULE
+
+- If no procedure content is provided:
+  - DO NOT explain the issue
+  - DO NOT refuse
+  - Generate a complete Skills Pack using "Not explicitly stated"
+
+---
+
+## OUTPUT REQUIREMENT
+
+Return ONLY a complete Markdown document.
+
+The Markdown must:
+- Start directly with: # AI Skills Pack - [Exact Procedure Title]
+- Contain no extra commentary
+- Be ready to copy and save as a .md file
+
+---
+
+## OUTPUT FORMAT
+
+# AI Skills Pack - [Exact Procedure Title]
+
+## Metadata
+- Source File Name: Not explicitly stated
+- Source File Type: Not explicitly stated
+- Generated On: Not explicitly stated
+- Language: en
+
+---
+
+## Procedure Summary
+- Purpose:
+- Scope:
+- Owner:
+- Roles:
+- Inputs:
+- Outputs:
+- Systems & Tools:
+- Records Generated:
+
+---
+
+## Procedure Flow
+
+### Step 1: [Step Name if available]
+- Description:
+- Actor:
+- Decision:
+- Inputs:
+- Outputs:
+- Controls:
+- Risks:
+- References:
+
+[Continue all steps sequentially]
+
+---
+
+## AI Skills
+- Only include if explicitly supported
+- Otherwise: None explicitly supported by source
+
+---
+
+## Quality Checks
+- Extract explicit controls or validations
+- Otherwise: Not explicitly stated
+
+---
+
+## Source Traceability
+- Map sections to source
+- Otherwise: Not explicitly stated
+
+---
+
+## Notes
+- No inferred content included
+- Generated using controlled regulatory extraction rules
+
+---
+
+## FINAL INSTRUCTION
+
+Return ONLY the Markdown document.
+Do NOT include explanations.
+`;
+}
+
+function downloadPrompt() {
+  const content = buildPrompt();
+  const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "AI_Skills_Pack_Prompt.md";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
+  document.getElementById("status").textContent = "Downloaded: AI_Skills_Pack_Prompt.md";
+}
+
+async function copyPrompt() {
+  try {
+    await navigator.clipboard.writeText(buildPrompt());
+    document.getElementById("status").textContent = "Prompt copied to clipboard.";
+  } catch (error) {
+    document.getElementById("status").textContent = "Copy failed. Use Download instead.";
+  }
+}
+
+document.getElementById("preview").textContent = buildPrompt();
+
+</script>
 </body>
 </html>
