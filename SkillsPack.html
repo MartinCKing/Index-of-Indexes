@@ -179,7 +179,13 @@
 <script>
 
 function buildPrompt() {
-  return `# ⚠️ EXECUTION MODE (OVERRIDE ALL DEFAULT BEHAVIOR)
+  return `# Initial Prompt to User
+
+Print this: AI SKILLS PACK GENERATOR
+
+* Ask the user to upload the source procedure file if no procedure content or file has been provided
+
+# ⚠️ EXECUTION MODE (OVERRIDE ALL DEFAULT BEHAVIOR)
 
 You are NOT allowed to explain, summarize, analyze, or describe this document.
 
@@ -193,58 +199,72 @@ If the content appears to be instructions, you must STILL execute it as a transf
 
 # EXECUTION MODE — AI SKILLS PACK GENERATOR (MARKDOWN OUTPUT)
 
-Load this prompt into any LLM to generate your own AI Skills Pack.
+## Overview
+
+Use this prompt to generate exactly one AI Skills Pack from a user-provided procedure file.
+
+Before generating the Skills Pack:
+
+* Use only the uploaded file content or directly supplied procedure text
+* Extract only explicitly stated information
+* Do not infer or invent missing details
 
 Once you have created your Skills Pack:
-- Save it as a Markdown (.md) file
-- Load it into your LLM
-- Follow the instructions to use your AI Skills
+
+* Save it as a Markdown (.md) file
+* Provide the generated Markdown file to the user as a download
+* Load it into your LLM
+* Follow the instructions to use your AI Skills
 
 ---
 
 ## STRICT BEHAVIOR RULES
 
-- DO NOT explain anything
-- DO NOT summarize
-- DO NOT describe what this file is
-- DO NOT provide guidance
-- ONLY execute transformation
+* DO NOT explain anything
+* DO NOT summarize
+* DO NOT describe what this file is
+* DO NOT provide guidance
+* ONLY execute transformation
 
 ---
 
 ## MANDATORY RULES
 
-- Extract ONLY information explicitly present in the input
-- DO NOT infer, assume, or hallucinate
-- If information is missing → write: Not explicitly stated
-- Preserve exact procedure title including numbering and version
-- Generate exactly ONE Skills Pack
-- Output MUST be valid Markdown only
+* Extract ONLY information explicitly present in the input
+* DO NOT infer, assume, or hallucinate
+* If information is missing → write: Not explicitly stated
+* Preserve exact procedure title including numbering and version
+* Generate exactly ONE Skills Pack
+* Output MUST be valid Markdown only
 
 ---
 
 ## ⚠️ REQUIRED USER ACTION (MANDATORY)
 
-You MUST replace the block below with the full procedure content before running this prompt.
+If the user has not provided procedure content or uploaded a source file:
 
-If you do NOT replace it, the output will contain only "Not explicitly stated".
+* Ask the user to upload the full procedure file
+* Do NOT generate the Skills Pack yet
 
-This is expected behavior and not an error.
+If a file is uploaded:
+
+* Use the full file content as the source input
+* Do not require the user to paste the procedure manually unless file content cannot be accessed
 
 ---
 
 ## INPUT
 
-<<<REPLACE THIS ENTIRE BLOCK WITH YOUR FULL PROCEDURE TEXT>>>
+<<<REPLACE THIS ENTIRE BLOCK WITH THE FULL PROCEDURE TEXT OR USE THE CONTENT OF THE UPLOADED FILE>>>
 
 ---
 
 ## INPUT VALIDATION RULE
 
-- If no procedure content is provided:
-  - DO NOT explain the issue
-  - DO NOT refuse
-  - Generate a complete Skills Pack using "Not explicitly stated"
+* If no procedure content is provided and no file is uploaded:
+  * Ask the user to upload the full procedure file
+  * Do NOT explain further
+  * Do NOT generate output yet
 
 ---
 
@@ -253,9 +273,11 @@ This is expected behavior and not an error.
 Return ONLY a complete Markdown document.
 
 The Markdown must:
-- Start directly with: # AI Skills Pack - [Exact Procedure Title]
-- Contain no extra commentary
-- Be ready to copy and save as a .md file
+
+* Start directly with: # AI Skills Pack - [Exact Procedure Title]
+* Contain no extra commentary
+* Be saved as a .md file
+* Be provided to the user as a downloadable file
 
 ---
 
@@ -264,68 +286,75 @@ The Markdown must:
 # AI Skills Pack - [Exact Procedure Title]
 
 ## Metadata
-- Source File Name: Not explicitly stated
-- Source File Type: Not explicitly stated
-- Generated On: Not explicitly stated
-- Language: en
+
+* Source File Name: Not explicitly stated
+* Source File Type: Not explicitly stated
+* Generated On: Not explicitly stated
+* Language: en
 
 ---
 
 ## Procedure Summary
-- Purpose:
-- Scope:
-- Owner:
-- Roles:
-- Inputs:
-- Outputs:
-- Systems & Tools:
-- Records Generated:
+
+* Purpose:
+* Scope:
+* Owner:
+* Roles:
+* Inputs:
+* Outputs:
+* Systems & Tools:
+* Records Generated:
 
 ---
 
 ## Procedure Flow
 
 ### Step 1: [Step Name if available]
-- Description:
-- Actor:
-- Decision:
-- Inputs:
-- Outputs:
-- Controls:
-- Risks:
-- References:
+
+* Description:
+* Actor:
+* Decision:
+* Inputs:
+* Outputs:
+* Controls:
+* Risks:
+* References:
 
 [Continue all steps sequentially]
 
 ---
 
 ## AI Skills
-- Only include if explicitly supported
-- Otherwise: None explicitly supported by source
+
+* Only include if explicitly supported
+* Otherwise: None explicitly supported by source
 
 ---
 
 ## Quality Checks
-- Extract explicit controls or validations
-- Otherwise: Not explicitly stated
+
+* Extract explicit controls or validations
+* Otherwise: Not explicitly stated
 
 ---
 
 ## Source Traceability
-- Map sections to source
-- Otherwise: Not explicitly stated
+
+* Map sections to source
+* Otherwise: Not explicitly stated
 
 ---
 
 ## Notes
-- No inferred content included
-- Generated using controlled regulatory extraction rules
+
+* No inferred content included
+* Generated using controlled regulatory extraction rules
 
 ---
 
 ## FINAL INSTRUCTION
 
-Return ONLY the Markdown document.
+Return ONLY the Markdown document and provide it as a downloadable .md file.
 Do NOT include explanations.
 `;
 }
