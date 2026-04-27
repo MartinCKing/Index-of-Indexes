@@ -1,4 +1,5 @@
 https://martincking.github.io/Index-of-Indexes/news.csv
+https://martincking.github.io/Index-of-Indexes/Index_of_Indexes_2026b.csv
 https://martincking.github.io/Index-of-Indexes/Index_of_Indexes_2026a.csv
 https://martincking.github.io/Index-of-Indexes/Index_of_Indexes_2025b.csv
 https://martincking.github.io/Index-of-Indexes/Index_of_Indexes_2025a.csv
