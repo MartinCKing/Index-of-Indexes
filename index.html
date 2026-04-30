@@ -263,7 +263,7 @@
                 complete: results => {
                   results.data.forEach((row, i) => {
                     if (i === 0 && String(row[0]).toLowerCase().includes('date')) return; // skip header
-                    const date = (row[0] == null) ? '' : String(row[0]); // keep exact spacing
+                    const date = (row[0] == null) ? '' : String(row[0]).replace(/^'/, '');
                     const url  = (row[1] || '').trim();
                     if (date && url) dateURLMapping[date] = url;
                   });
@@ -288,7 +288,7 @@
           rowsOnly.forEach(r => {
             if (!r || r.every(cell => !cell)) return;
             // Expected: Date, Agency, Category, Title[, Link]
-            const date     = (r[0] == null) ? '' : String(r[0]);  // keep exact value
+            const date = (r[0] == null) ? '' : String(r[0]).replace(/^'/, '');
             const agency   = (r[1] || '').trim();
             const category = (r[2] || '').trim();
             const title    = (r[3] || '').trim();
