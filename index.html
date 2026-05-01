@@ -212,6 +212,10 @@
       norm(row[1]).includes('agency');
 
     const normAgency = s => String(s || '').trim().replace(/\s+/g,' ').toUpperCase();
+    const cleanDate = value =>
+      String(value || '')
+        .replace(/^'/, '')
+        .replace(/^(\s*)0(?=\d)/, '$1');
 
     function loadCSVFiles() {
       // 0) Load list of data CSVs from csv_sources.txt
@@ -221,11 +225,9 @@
           return res.text();
         })
         .then(text => {
-          CSV_SOURCES = text
-            .replace(/\r/g, '')                // handle Windows CRLF
-            .split('\n')
-            .map(l => l.trim())
-            .filter(l => l && !l.startsWith('#'));
+          CSV_SOURCES = (text.match(/https?:\/\/\S+/g) || [])
+            .map(url => url.trim())
+            .filter(url => url && !url.startsWith('#'));
 
           if (!CSV_SOURCES.length) CSV_SOURCES = [...FALLBACK_CSV_SOURCES];
           fetchAgencyAndURLMaps();
@@ -263,7 +265,7 @@
                 complete: results => {
                   results.data.forEach((row, i) => {
                     if (i === 0 && String(row[0]).toLowerCase().includes('date')) return; // skip header
-                    const date = (r[0] == null) ? '' : String(r[0]).replace(/^'0?/, '');
+                    const date = cleanDate(row[0]);
                     const url  = (row[1] || '').trim();
                     if (date && url) dateURLMapping[date] = url;
                   });
@@ -276,31 +278,102 @@
         });
     }
 
+    function parseCSVRow(line) {
+      const cells = [];
+      let cell = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        const next = line[i + 1];
+
+        if (ch === '"' && inQuotes && next === '"') {
+          cell += '"';
+          i++;
+        } else if (ch === '"') {
+          inQuotes = !inQuotes;
+        } else if (ch === ',' && !inQuotes) {
+          cells.push(cell);
+          cell = '';
+        } else {
+          cell += ch;
+        }
+      }
+
+      cells.push(cell);
+      return cells;
+    }
+
+    function parseCSVLineByLine(txt) {
+      const rows = [];
+      const lines = String(txt || '').replace(/\r/g, '').split('\n');
+
+      lines.forEach((line, index) => {
+        line = line.trimEnd();
+        if (!line) return;
+
+        const cells = parseCSVRow(line);
+
+        // Skip header
+        if (
+          index === 0 &&
+          String(cells[0] || '').toLowerCase().trim() === 'date' &&
+          String(cells[1] || '').toLowerCase().trim() === 'agency'
+        ) return;
+
+        if (cells.length < 4) return;
+
+        const date = cleanDate(cells[0]);
+        const agency = (cells[1] || '').trim();
+        const category = (cells[2] || '').trim();
+
+        let link = '';
+        let titleParts = cells.slice(3);
+
+        // Link should be the final URL-looking cell.
+        const lastCell = (titleParts[titleParts.length - 1] || '').trim();
+        if (/^https?:\/\//i.test(lastCell)) {
+          link = lastCell;
+          titleParts = titleParts.slice(0, -1);
+        }
+
+        const title = titleParts
+          .map(cell => (cell || '').trim())
+          .filter(Boolean)
+          .join(', ');
+
+        if (date || agency || category || title) {
+          rows.push([date, agency, category, title, link]);
+        }
+      });
+
+      return rows;
+    }
+
     function fetchAndCombineDataCSVs() {
       Promise.all(
-        CSV_SOURCES.map(src => fetch(encodeURI(src)).then(r => r.text()))
+        CSV_SOURCES.map(src =>
+          fetch(encodeURI(`${src}${src.includes('?') ? '&' : '?'}t=${Date.now()}`))
+            .then(r => {
+              if (!r.ok) throw new Error(`Failed to load CSV: ${src}`);
+              return r.text();
+            })
+            .catch(err => {
+              console.warn(err);
+              return '';
+            })
+        )
       ).then(texts => {
         let merged = [];
+
         texts.forEach(txt => {
-          const parsed = Papa.parse(txt, { skipEmptyLines: true }).data;
-          const rowsOnly = (parsed.length && looksLikeHeader(parsed[0])) ? parsed.slice(1) : parsed;
-
-          rowsOnly.forEach(r => {
-            if (!r || r.every(cell => !cell)) return;
-            // Expected: Date, Agency, Category, Title[, Link]
-            const date = (r[0] == null) ? '' : String(r[0]).replace(/^'/, '');
-            const agency   = (r[1] || '').trim();
-            const category = (r[2] || '').trim();
-            const title    = (r[3] || '').trim();
-            const link     = (r[4] || '').trim(); // optional: direct title link
-
-            if (date || agency || category || title) {
-              merged.push([date, agency, category, title, link]);
-            }
-          });
+          merged = merged.concat(parseCSVLineByLine(txt));
         });
 
         tableData = merged;
+        console.log('CSV sources:', CSV_SOURCES);
+        console.log('Rows loaded:', tableData.length);
+
         renderTable(tableData);
         populateFilters(tableData);
         adjustDateColumnWidth(tableData);
