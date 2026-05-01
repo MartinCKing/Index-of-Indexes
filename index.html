@@ -263,7 +263,7 @@
                 complete: results => {
                   results.data.forEach((row, i) => {
                     if (i === 0 && String(row[0]).toLowerCase().includes('date')) return; // skip header
-                    const date = (row[0] == null) ? '' : String(row[0]).replace(/^'/, '');
+                    const date = (r[0] == null) ? '' : String(r[0]).replace(/^'0?/, '');
                     const url  = (row[1] || '').trim();
                     if (date && url) dateURLMapping[date] = url;
                   });
