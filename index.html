@@ -370,7 +370,22 @@
           merged = merged.concat(parseCSVLineByLine(txt));
         });
 
-        tableData = merged;
+        // Deduplicate rows based on link (5th column)
+      const seenLinks = new Set();
+
+      tableData = merged.filter(row => {
+        const link = (row[4] || '').trim();
+      
+        // If no link, keep it (optional: you can also exclude these if needed)
+        if (!link) return true;
+
+        if (seenLinks.has(link)) {
+          return false; // skip duplicate
+        } else {
+          seenLinks.add(link);
+          return true; // keep first occurrence
+        }
+      });
         console.log('CSV sources:', CSV_SOURCES);
         console.log('Rows loaded:', tableData.length);
 
