@@ -36,19 +36,16 @@ h1 .accent{color:#FBBB6A}
 <p class="intro">Keep your emphasis. Prepare a clean, plain-text post.</p>
 <section class="card">
 <div class="grid"><div>
-<div class="editor-heading"><label id="inputLabel">Input Editor · rich text</label>
-<div class="toolbar" role="toolbar" aria-label="Text formatting"><button type="button" data-format="bold" aria-label="Bold"><b>B</b></button><button type="button" data-format="italic" aria-label="Italic"><i>I</i></button><button type="button" id="emojiButton" aria-expanded="false" aria-controls="emojiPanel">😀</button><button type="button" id="copilotButton" aria-expanded="false" aria-controls="copilotPanel">Copilot</button></div></div>
+<div class="editor-heading"><label id="inputLabel">Input · rich text · Editor</label>
+<div class="toolbar" role="toolbar" aria-label="Text formatting"><button type="button" data-format="bold" aria-label="Bold"><b>B</b></button><button type="button" data-format="italic" aria-label="Italic"><i>I</i></button><button type="button" id="emojiButton" aria-expanded="false" aria-controls="emojiPanel">😀</button></div></div>
 <div id="inputBox" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="inputLabel" data-placeholder="Type or paste your formatted text here…"></div>
-<p class="help">Paste normally to retain formatting and links. Use Ctrl/⌘+B or Ctrl/⌘+I for emphasis. Plain-text pastes cannot carry bold, italic, or hidden link destinations.</p>
+<p class="help">Paste normally to retain formatting and links. Use Ctrl/⌘+B or Ctrl/⌘+I for emphasis. Create Copilot search link uses the fields below and the first sentence of this input. Plain-text pastes cannot carry bold, italic, or hidden link destinations.</p>
 </div><div><div class="editor-heading"><label for="outputText">Output · plain Unicode text</label></div><textarea id="outputText" readonly placeholder="Your converted post will appear here."></textarea><p class="help" id="count">Ready to convert.</p></div></div>
 <div id="emojiPanel" class="tool-panel" hidden><p class="label">Insert an emoji at the cursor</p><div class="emoji-options" id="emojiOptions"></div></div>
-<div id="copilotPanel" class="tool-panel" hidden><p class="label">Add a Roundup entry with a Copilot link</p><p class="help">The search uses “Agency Post Title”. Insert the complete entry, or only its bold-italic Copilot link, at the editor cursor.</p>
-<form id="entryForm"><div class="entry-fields">
-<label>Agency<input id="entryAgency" required placeholder="Medical Device Authority"></label><label>Agency link (optional)<input id="entryAgencyUrl" type="url" placeholder="https://www.linkedin.com/in/…"></label>
-<label>Category<input id="entryCategory" value="Announcement"></label><label>Title link (optional)<input id="entryTitleUrl" type="url" placeholder="https://www.linkedin.com/feed/update/…"></label>
-<label class="wide">Title<input id="entryTitle" required placeholder="Update on Product Classification Application System…"></label>
-<label class="wide">Summary (optional)<textarea id="entrySummary" placeholder="Add the announcement summary here."></textarea></label></div>
-<div class="actions"><button type="submit" class="primary">Insert complete entry</button><button type="button" id="insertCopilot">Insert Copilot link only</button><button type="button" id="loadExample">Load your MDA example</button></div></form></div>
+<div class="tool-panel"><p class="label">Create Copilot search link</p><div class="entry-fields">
+<label for="copilotAgency">Contributor/Agency<input id="copilotAgency" placeholder="Insert your name/agency" required></label>
+<label for="copilotCategory">Category<select id="copilotCategory" style="width:100%"><option>Announcement</option><option>Post</option><option>News</option><option>Regulation</option><option>Guidance</option><option>Standard</option><option>Consultation</option><option>Research</option><option>Event</option></select></label>
+<label class="wide" for="copilotTitle">Title · first sentence of input<input id="copilotTitle" readonly placeholder="Automatically taken from your input"></label></div><p class="help">The search always uses your Contributor/Agency, the selected Category, and the first sentence of the editor input.</p><button type="button" id="copilotButton" class="primary">Create Copilot search link</button></div>
 <div class="options"><div><label for="modeSelect">Output mode</label><select id="modeSelect"><option value="auto">Auto (detect input formatting)</option><option value="normal">Normal</option><option value="bold">Force Bold</option><option value="italic">Force Italic</option><option value="bolditalic">Force Bold+Italic</option></select></div><label class="toggle"><input type="checkbox" id="signature" checked> Add thank-you signature</label></div>
 <p class="help">Linked labels become plain “@Name” in the LinkedIn output. Visible URLs stay unchanged. An @ prefix is text: select the matching LinkedIn suggestion to create a mention.</p>
 <details open><summary>Article HTML output · bold, italic and clickable links</summary><div id="richOutput" style="white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #bac8d8;border-radius:10px;padding:16px;margin-top:12px;min-height:80px">Convert your text to preview linked HTML here.</div><p class="help">Copy for article supplies native bold, italic and hyperlinks as HTML. Use normal paste (Ctrl/⌘+V), rather than paste as plain text. The receiving editor may still remove some formatting. Copy for LinkedIn always copies the separate Unicode output above.</p></details>
@@ -118,7 +115,7 @@ function articleParagraphs(html){
  return container.innerHTML;
 }
 let dirty=true,pasting=false,richHtml='',articlePlain='';
-function invalidate(){dirty=true;copyButton.disabled=true;copyRichButton.disabled=true;status.textContent='Input changed. Click Convert to refresh the output.';}
+function invalidate(){dirty=true;copyButton.disabled=true;copyRichButton.disabled=true;updateCopilotTitle();status.textContent='Input changed. Click Convert to refresh the output.';}
 function convert(){if(pasting){status.textContent='Finishing the rich-text paste. Please try Convert again in a moment.';return;}let text=extract(input);if(!text.trim()){output.value='';richOutput.textContent='Add some text before converting.';richHtml='';articlePlain='';copyButton.disabled=true;copyRichButton.disabled=true;status.textContent='Add some text before converting.';return;}let html=extract(input,true);if(signature.checked){text+='\n\n'+SIGNATURE;html+='\n\n<strong>Thank you</strong> 🙏 for <strong>your</strong> time and please <strong>Like 👍</strong>, <strong>Share</strong>, and/or <strong>Comment</strong>';}output.value=text;richHtml=articleParagraphs(html);richOutput.innerHTML=richHtml;articlePlain=Array.from(richOutput.children,p=>p.textContent).join('\n\n');dirty=false;copyButton.disabled=false;copyRichButton.disabled=false;document.getElementById('count').textContent=Array.from(text).length.toLocaleString()+' Unicode characters';status.textContent='Converted. Copy for LinkedIn uses Unicode and @ labels; Copy for article uses native formatting, paragraphs and hyperlinks.';}
 input.addEventListener('input',invalidate);mode.addEventListener('change',invalidate);signature.addEventListener('change',invalidate);document.getElementById('convertButton').addEventListener('click',convert);
 document.querySelectorAll('[data-format]').forEach(button=>{button.addEventListener('mousedown',e=>e.preventDefault());button.addEventListener('click',()=>{input.focus();document.execCommand(button.dataset.format,false);invalidate();});});
@@ -132,18 +129,29 @@ function insertEditorHtml(html){
  if(!document.execCommand('insertHTML',false,html)){const fragment=range.createContextualFragment(html),last=fragment.lastChild;range.deleteContents();range.insertNode(fragment);if(last){range.setStartAfter(last);range.collapse(true);selection.removeAllRanges();selection.addRange(range);}}
  if(selection.rangeCount)editorBookmark=selection.getRangeAt(0).cloneRange();invalidate();
 }
-for(const [buttonId,panelId] of [['emojiButton','emojiPanel'],['copilotButton','copilotPanel']]){const button=document.getElementById(buttonId),panel=document.getElementById(panelId);button.addEventListener('mousedown',e=>e.preventDefault());button.addEventListener('click',()=>{panel.hidden=!panel.hidden;button.setAttribute('aria-expanded',String(!panel.hidden));});}
+for(const [buttonId,panelId] of [['emojiButton','emojiPanel']]){const button=document.getElementById(buttonId),panel=document.getElementById(panelId);button.addEventListener('mousedown',e=>e.preventDefault());button.addEventListener('click',()=>{panel.hidden=!panel.hidden;button.setAttribute('aria-expanded',String(!panel.hidden));});}
+function firstInputSentence(){
+ const clone=input.cloneNode(true);clone.querySelectorAll('a').forEach(anchor=>{try{const url=new URL(anchor.getAttribute('href'));if(url.hostname==='www.bing.com'&&url.pathname==='/copilotsearch')anchor.remove();}catch(ignore){}});
+ let text='';function walk(node){if(node.nodeType===3){text+=node.nodeValue;return;}if(node.nodeType!==1)return;if(['SCRIPT','STYLE','TEMPLATE'].includes(node.tagName))return;const block=['P','DIV','LI','BR'].includes(node.tagName);if(block)text+=' ';for(const child of node.childNodes)walk(child);if(block)text+=' ';}for(const child of clone.childNodes)walk(child);
+ text=unstyle(text).replace(/\s+/g,' ').trim();if(!text)return '';
+ if(typeof Intl.Segmenter==='function')return [...new Intl.Segmenter('en',{granularity:'sentence'}).segment(text)][0].segment.trim();
+ return (text.match(/^.*?[.!?](?=\s|$)/)||[text])[0].trim();
+}
+function updateCopilotTitle(){document.getElementById('copilotTitle').value=firstInputSentence();}
+document.getElementById('copilotButton').addEventListener('mousedown',event=>event.preventDefault());
+document.getElementById('copilotButton').addEventListener('click',()=>{
+ if(pasting){status.textContent='Wait for the current paste to finish.';return;}
+ const range=editorBookmark&&input.contains(editorBookmark.commonAncestorContainer)?editorBookmark:null;
+ const agency=unstyle(document.getElementById('copilotAgency').value).replace(/\s+/g,' ').trim(),category=document.getElementById('copilotCategory').value,title=firstInputSentence();updateCopilotTitle();
+ if(!agency){status.textContent='Enter a Contributor/Agency before generating a Copilot link.';document.getElementById('copilotAgency').focus();return;}
+ if(!title){status.textContent='Add input text so Copilot can use its first sentence as the title.';return;}
+ const query=agency+' '+category+' '+title;
+ if(range){editorBookmark=range.cloneRange();editorBookmark.collapse(false);}
+ insertEditorHtml(' '+linkHtml('https://www.bing.com/copilotsearch?q='+encodeURIComponent(query)+'&showconv=1','<strong><em>Copilot</em></strong>')+' ');
+ status.textContent='Copilot link generated from Contributor/Agency, Category and the first input sentence. Click Convert.';
+});
 document.getElementById('emojiButton').setAttribute('aria-label','Insert emoji');
 for(const [emoji,name] of [['🔴','Red circle'],['🔸','Orange diamond'],['📌','Pin'],['🚨','Alert'],['👀','Eyes'],['👉','Point right'],['👍','Like'],['🙏','Thank you'],['✅','Check'],['⚠️','Warning'],['🩺','Medical'],['🔬','Research'],['💡','Idea'],['📅','Date'],['🌍','World'],['🇨🇭','Switzerland'],['▶️','Play'],['⏩','Fast forward'],['⏪','Rewind'],['⏹️','Stop']]){const button=document.createElement('button');button.type='button';button.textContent=emoji;button.title=name;button.setAttribute('aria-label',name);button.addEventListener('mousedown',e=>e.preventDefault());button.addEventListener('click',()=>insertEditorHtml(escapeHtml(emoji)));document.getElementById('emojiOptions').append(button);}
-function entryData(){const get=id=>document.getElementById(id).value.trim();return {agency:get('entryAgency'),agencyUrl:get('entryAgencyUrl'),category:get('entryCategory'),title:get('entryTitle'),titleUrl:get('entryTitleUrl'),summary:get('entrySummary')};}
-function copilotHtml(data){const query=data.agency+' Post '+data.title;return linkHtml('https://www.bing.com/copilotsearch?q='+encodeURIComponent(query)+'&showconv=1','<strong><em>Copilot</em></strong>');}
-document.getElementById('entryForm').addEventListener('submit',event=>{event.preventDefault();const data=entryData();for(const url of [data.agencyUrl,data.titleUrl])if(url&&!/^https?:\/\//i.test(safeHref(url))){status.textContent='Use a complete http or https link.';return;}
- const agency='<strong>'+escapeHtml(data.agency)+'</strong>',title='<strong>'+escapeHtml(data.title)+'</strong>';
- const html='<p>'+(data.agencyUrl?linkHtml(data.agencyUrl,agency):agency)+': '+(data.category?'<strong>'+escapeHtml(data.category)+'</strong>, ':'')+(data.titleUrl?linkHtml(data.titleUrl,title):title)+', '+copilotHtml(data)+(data.summary?', '+escapeHtml(data.summary):'')+'</p>';
- insertEditorHtml(html);status.textContent='Roundup entry inserted, including its ready-to-use Copilot search link. Click Convert.';
-});
-document.getElementById('insertCopilot').addEventListener('click',()=>{if(!document.getElementById('entryForm').reportValidity())return;insertEditorHtml(copilotHtml(entryData()));status.textContent='Copilot link inserted. Click Convert.';});
-document.getElementById('loadExample').addEventListener('click',()=>{const values={entryAgency:'Medical Device Authority',entryAgencyUrl:'https://www.linkedin.com/in/medical-device-authority-malaysia-17a6a5383?',entryCategory:'Announcement',entryTitle:'Update on Product Classification Application System and Implementation of Validity Period for Product Classification Letter',entryTitleUrl:'https://www.linkedin.com/feed/update/urn:li:activity:7511651370815377408/',entrySummary:"Medical Device Authority Update on Product Classification Application System and Implementation of Validity Period for Product Classification Letter Effective 1 October 2026, Malaysia's Medical Device Authority (MDA) updates the Product Classification Application System (PCAS), introduces revised validity and renewal rules for Product Classification..."};for(const [id,value] of Object.entries(values))document.getElementById(id).value=value;});
 // Resolve source CSS inside an inert, isolated document, then retain only
 // text, block/list structure and computed bold/italic. No pasted executable
 // content, external resources or source CSS enters the actual editor.
@@ -199,5 +207,6 @@ copyRichButton.addEventListener('click',async()=>{
  }
 });
 </script></body></html>
+
 
 
