@@ -1,149 +1,168 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Unicode Style Converter (Auto + Manual)</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regulatory Roundup · MedTech Leading Voice Unicode Convertor</title>
 <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    #inputBox {
-        width: 100%;
-        min-height: 180px;
-        border: 1px solid #aaa;
-        padding: 10px;
-        font-size: 16px;
-    }
-    textarea {
-        width: 100%;
-        height: 180px;
-        font-size: 16px;
-        margin-top: 15px;
-    }
-    select, button {
-        padding: 8px 14px;
-        font-size: 15px;
-        margin-top: 10px;
-        margin-right: 10px;
-    }
+*{box-sizing:border-box}body{margin:0;background:#f3f6fa;color:#172b43;font:16px/1.55 system-ui,sans-serif}main{max-width:1100px;margin:40px auto;padding:0 24px}h1{font-size:30px;letter-spacing:-.8px;margin-bottom:8px}.intro{color:#52647a;margin-top:0}.card{background:white;border:1px solid #dbe3ec;border-radius:16px;padding:24px;margin:20px 0;box-shadow:0 4px 20px #172b4306}.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}label,.label{font-weight:600;display:block;margin-bottom:8px}.help{font-size:14px;color:#52647a}button,select{font:inherit;border:1px solid #bac8d8;border-radius:8px;padding:9px 14px;background:white;color:#172b43}button{cursor:pointer}button:hover{background:#edf3fa}button.primary{background:#0866c2;border-color:#0866c2;color:white}button:disabled{opacity:.5;cursor:default}button:focus-visible,select:focus-visible,textarea:focus-visible,[contenteditable]:focus-visible{outline:3px solid #5aa9ef;outline-offset:2px}.toolbar{display:flex;gap:8px;margin-bottom:10px}#inputBox,textarea{width:100%;min-height:330px;border:1px solid #bac8d8;border-radius:10px;padding:16px;font:16px/1.6 system-ui,sans-serif;color:#172b43;overflow-wrap:anywhere;white-space:pre-wrap}#inputBox:empty:before{content:attr(data-placeholder);color:#7c899a;pointer-events:none}#inputBox p{margin:0 0 12px}textarea{resize:vertical;background:#f9fbfd}.options{display:flex;align-items:center;flex-wrap:wrap;gap:20px}.options label{margin:0}.toggle{font-weight:400;display:flex;gap:8px;align-items:center}input[type=checkbox]{width:18px;height:18px;accent-color:#0866c2}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}#status{min-height:26px;margin-bottom:0;color:#24557d}details{margin-top:16px;font-size:14px}summary{cursor:pointer;color:#52647a}.footer{color:#52647a;font-size:13px}@media(max-width:760px){main{margin:24px auto;padding:0 16px}.grid{grid-template-columns:1fr}.card{padding:18px}#inputBox,textarea{min-height:240px}}
+/* Regulatory Roundup branding, adapted from the supplied index.html. */
+body{background:#000;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
+main{margin:28px auto}
+.brand-banner{display:flex;align-items:center;background:#fff;color:#f00;max-width:700px;height:60px;margin:0 auto 20px;font-size:24px;font-weight:bold;box-shadow:0 2px 4px #0003}
+.brand-flag{height:60px;width:60px;flex-shrink:0;background:#f00;position:relative}
+.brand-flag:before,.brand-flag:after{content:'';position:absolute;background:#fff;inset:12px 24px}
+.brand-flag:after{inset:24px 12px}
+.brand-banner span{flex:1;text-align:center;padding:0 12px}
+h1{text-align:center;color:#fff;font-size:26px;margin:0 0 12px;letter-spacing:0}
+h1 .accent{color:#FBBB6A}
+.intro{text-align:center;color:#ddd}
+.footer{color:#bbb;text-align:center}
+.editor-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:46px;margin-bottom:10px}
+.editor-heading label{margin:0}
+.editor-heading .toolbar{margin:0}
+#inputBox,textarea{height:330px;min-height:330px;overflow:auto;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
+@media(max-width:760px){.brand-banner{font-size:19px}h1{font-size:22px}#inputBox,textarea{height:260px;min-height:260px}.editor-heading{min-height:46px}}
 </style>
 </head>
-<body>
-
-<h2>Unicode Style Converter</h2>
-
-<p>
-    <b>Input (rich text):</b><br>
-    Use <b>Ctrl+B</b> / <i>Ctrl+I</i> etc. to format text here.  
-</p>
-
-<div id="inputBox" contenteditable="true">
-    Type or paste text here… make some <b>bold</b>, some <i>italic</i>, some <b><i>both</i></b>.
-</div>
-
-<p>
-    <label for="modeSelect"><b>Output mode:</b></label>
-    <select id="modeSelect">
-        <option value="auto">Auto (detect from input formatting)</option>
-        <option value="normal">Normal (no style, just bullets → 🔸)</option>
-        <option value="bold">Force Bold</option>
-        <option value="italic">Force Italic</option>
-        <option value="bolditalic">Force Bold + Italic</option>
-    </select>
-
-    <button onclick="convert()">Convert</button>
-</p>
-
-<h3>Output (plain Unicode text):</h3>
-<textarea id="outputText" readonly></textarea>
-
+<body><main>
+<header><div class="brand-banner"><div class="brand-flag" role="img" aria-label="Swiss flag"></div><span>REGULATORY ROUNDUP</span></div>
+<h1>MedTech <span class="accent">Leading Voice</span> Unicode Convertor</h1></header>
+<p class="intro">Keep your emphasis. Prepare a clean, plain-text post.</p>
+<section class="card">
+<div class="grid"><div>
+<div class="editor-heading"><label id="inputLabel">Input · rich text</label>
+<div class="toolbar" role="toolbar" aria-label="Text formatting"><button type="button" data-format="bold" aria-label="Bold"><b>B</b></button><button type="button" data-format="italic" aria-label="Italic"><i>I</i></button></div></div>
+<div id="inputBox" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="inputLabel" data-placeholder="Type or paste your formatted text here…"></div>
+<p class="help">Paste normally to retain formatting and links. Use Ctrl/⌘+B or Ctrl/⌘+I for emphasis. Plain-text pastes cannot carry bold, italic, or hidden link destinations.</p>
+</div><div><div class="editor-heading"><label for="outputText">Output · plain Unicode text</label></div><textarea id="outputText" readonly placeholder="Your converted post will appear here."></textarea><p class="help" id="count">Ready to convert.</p></div></div>
+<div class="options"><div><label for="modeSelect">Output mode</label><select id="modeSelect"><option value="auto">Auto (detect input formatting)</option><option value="normal">Normal</option><option value="bold">Force Bold</option><option value="italic">Force Italic</option><option value="bolditalic">Force Bold+Italic</option></select></div><label class="toggle"><input type="checkbox" id="signature" checked> Add thank-you signature</label></div>
+<p class="help">Linked labels become plain “@Name” in the LinkedIn output. Visible URLs stay unchanged. An @ prefix is text: select the matching LinkedIn suggestion to create a mention.</p>
+<details open><summary>Article HTML output · bold, italic and clickable links</summary><div id="richOutput" style="white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #bac8d8;border-radius:10px;padding:16px;margin-top:12px;min-height:80px">Convert your text to preview linked HTML here.</div><p class="help">Copy for article supplies native bold, italic and hyperlinks as HTML. Use normal paste (Ctrl/⌘+V), rather than paste as plain text. The receiving editor may still remove some formatting. Copy for LinkedIn always copies the separate Unicode output above.</p></details>
+<details><summary>Signature and conversion details</summary><p id="signaturePreview"></p><p>Line and paragraph breaks become one blank line, with excessive blank lines removed. Bullets • ▪ ● ◦ and unordered lists become 🔸. Numbered lists retain their numbers. Styles use the original sans-serif Unicode mappings: English letters, plus digits in bold mode. Other characters stay unchanged.</p><p>Formatting detection depends on the HTML supplied by the source application. If a source strips formatting, use the formatting buttons or a Force mode.</p></details>
+<div class="actions"><button type="button" class="primary" id="convertButton">1. Convert</button><button type="button" id="copyButton" disabled>2. Copy for LinkedIn Post</button><button type="button" id="copyRichButton" disabled>Copy for LinkedIn Article (rich HTML)</button></div>
+<p id="status" role="status" aria-live="polite">Paste text above, then click Convert.</p>
+</section><p class="footer">Self-contained · Works offline · Your text stays in this browser</p>
+</main>
 <script>
-// --- Mapping based on your Python script ---------------------------
-
-const sansBold = {
-'A':'𝗔','B':'𝗕','C':'𝗖','D':'𝗗','E':'𝗘','F':'𝗙','G':'𝗚','H':'𝗛','I':'𝗜','J':'𝗝','K':'𝗞','L':'𝗟','M':'𝗠','N':'𝗡',
-'O':'𝗢','P':'𝗣','Q':'𝗤','R':'𝗥','S':'𝗦','T':'𝗧','U':'𝗨','V':'𝗩','W':'𝗪','X':'𝗫','Y':'𝗬','Z':'𝗭',
-'a':'𝗮','b':'𝗯','c':'𝗰','d':'𝗱','e':'𝗲','f':'𝗳','g':'𝗴','h':'𝗵','i':'𝗶','j':'𝗷','k':'𝗸','l':'𝗹','m':'𝗺','n':'𝗻',
-'o':'𝗼','p':'𝗽','q':'𝗾','r':'𝗿','s':'𝘀','t':'𝘁','u':'𝘂','v':'𝘃','w':'𝘄','x':'𝘅','y':'𝘆','z':'𝘇',
-'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵'
-};
-
-const sansItalic = {
-'A':'𝘈','B':'𝘉','C':'𝘊','D':'𝘋','E':'𝘌','F':'𝘍','G':'𝘎','H':'𝘏','I':'𝘐','J':'𝘑','K':'𝘒','L':'𝘓','M':'𝘔','N':'𝘕',
-'O':'𝘖','P':'𝘗','Q':'𝘘','R':'𝘙','S':'𝘚','T':'𝘛','U':'𝘜','V':'𝘝','W':'𝘞','X':'𝘟','Y':'𝘠','Z':'𝘡',
-'a':'𝘢','b':'𝘣','c':'𝘤','d':'𝘥','e':'𝘦','f':'𝘧','g':'𝘨','h':'𝘩','i':'𝘪','j':'𝘫','k':'𝘬','l':'𝘭','m':'𝘮','n':'𝘯',
-'o':'𝘰','p':'𝘱','q':'𝘲','r':'𝘳','s':'𝘴','t':'𝘵','u':'𝘶','v':'𝘷','w':'𝘸','x':'𝘹','y':'𝘺','z':'𝘻'
-};
-
-const sansBoldItalic = {
-'A':'𝘼','B':'𝘽','C':'𝘾','D':'𝘿','E':'𝙀','F':'𝙁','G':'𝙂','H':'𝙃','I':'𝙄','J':'𝙅','K':'𝙆','L':'𝙇','M':'𝙈','N':'𝙉',
-'O':'𝙊','P':'𝙋','Q':'𝙌','R':'𝙍','S':'𝙎','T':'𝙏','U':'𝙐','V':'𝙑','W':'𝙒','X':'𝙓','Y':'𝙔','Z':'𝙕',
-'a':'𝙖','b':'𝙗','c':'𝙘','d':'𝙙','e':'𝙚','f':'𝙛','g':'𝙜','h':'𝙝','i':'𝙞','j':'𝙟','k':'𝙠','l':'𝙡','m':'𝙢','n':'𝙣',
-'o':'𝙤','p':'𝙥','q':'𝙦','r':'𝙧','s':'𝙨','t':'𝙩','u':'𝙪','v':'𝙫','w':'𝙬','x':'𝙭','y':'𝙮','z':'𝙯'
-};
-
-// bullet replacement like your Python convert_char
-const bulletChars = ['•', '▪', '●', '◦'];
-
-function convertChar(c, bold, italic) {
-    if (bulletChars.includes(c)) {
-        return '🔸';
-    }
-    if (bold && italic) return sansBoldItalic[c] || c;
-    if (bold) return sansBold[c] || c;
-    if (italic) return sansItalic[c] || c;
-    return c;
+'use strict';
+const input=document.getElementById('inputBox'),output=document.getElementById('outputText'),mode=document.getElementById('modeSelect'),signature=document.getElementById('signature'),copyButton=document.getElementById('copyButton'),status=document.getElementById('status');
+const SIGNATURE='𝗧𝗵𝗮𝗻𝗸 𝘆𝗼𝘂 🙏 for 𝘆𝗼𝘂𝗿 time and please 𝗟𝗶𝗸𝗲 👍, 𝗦𝗵𝗮𝗿𝗲, and/or 𝗖𝗼𝗺𝗺𝗲𝗻𝘁';
+document.getElementById('signaturePreview').textContent=SIGNATURE;
+function convertChar(c,bold,italic){
+ if('•▪●◦'.includes(c))return '🔸';
+ const n=c.codePointAt(0),base=bold&&italic?[0x1d63c,0x1d656]:bold?[0x1d5d4,0x1d5ee]:italic?[0x1d608,0x1d622]:null;
+ if(!base)return c;
+ if(n>=65&&n<=90)return String.fromCodePoint(base[0]+n-65);
+ if(n>=97&&n<=122)return String.fromCodePoint(base[1]+n-97);
+ if(bold&&!italic&&n>=48&&n<=57)return String.fromCodePoint(0x1d7ec+n-48);
+ return c;
 }
-
-// Helpers to detect formatting from DOM
-function isBoldElement(el) {
-    const style = window.getComputedStyle(el);
-    const fw = style.fontWeight;
-    // fw can be "bold" or a number string like "700"
-    return fw === "bold" || parseInt(fw, 10) >= 600;
+function normalize(text){return text.replace(/\r\n?|\u2028|\u2029/g,'\n').replace(/\u00a0/g,' ').replace(/[\t ]*\n[\t ]*/g,'\n').replace(/\n+/g,'\n\n').trimEnd();}
+function safeHref(value){
+ if(!value)return '';const raw=value.trim();
+ if(/[\s\u0000-\u001f\u007f]/.test(raw))return '';
+ try{const url=new URL(raw);return ['http:','https:','mailto:'].includes(url.protocol)?raw:'';}catch(error){return '';}
 }
-
-function isItalicElement(el) {
-    const style = window.getComputedStyle(el);
-    return style.fontStyle === "italic" || style.fontStyle === "oblique";
+function styledText(text,bold,italic){
+ // Never substitute Unicode letters in a URL: that would change its destination.
+ return text.split(/((?:https?:\/\/|www\.|mailto:)[^\s<>]+)/gi).map((part,index)=>index%2?part:Array.from(part,c=>convertChar(c,bold,italic)).join('')).join('');
 }
-
-function convert() {
-    const input = document.getElementById("inputBox");
-    const mode = document.getElementById("modeSelect").value;
-    let output = "";
-
-    if (mode === "auto") {
-        // Walk text nodes and use the formatting of their parent
-        const walker = document.createTreeWalker(input, NodeFilter.SHOW_TEXT, null, false);
-
-        while (walker.nextNode()) {
-            const textNode = walker.currentNode;
-            const parent = textNode.parentElement || input;
-
-            const bold = isBoldElement(parent);
-            const italic = isItalicElement(parent);
-
-            for (let c of textNode.nodeValue) {
-                output += convertChar(c, bold, italic);
-            }
-        }
-    } else {
-        // Global style: ignore formatting, just apply the selected style to all characters
-        const text = input.innerText;  // plain text from editor
-        let bold = false, italic = false;
-
-        if (mode === "bold") { bold = true; italic = false; }
-        else if (mode === "italic") { bold = false; italic = true; }
-        else if (mode === "bolditalic") { bold = true; italic = true; }
-        else if (mode === "normal") { bold = false; italic = false; }
-
-        for (let c of text) {
-            output += convertChar(c, bold, italic);
-        }
-    }
-
-    document.getElementById("outputText").value = output;
+function escapeHtml(text){return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function unstyle(text){return Array.from(text,c=>{const n=c.codePointAt(0);for(const [base,ascii,count] of [[0x1d5d4,65,26],[0x1d5ee,97,26],[0x1d608,65,26],[0x1d622,97,26],[0x1d63c,65,26],[0x1d656,97,26],[0x1d7ec,48,10]])if(n>=base&&n<base+count)return String.fromCharCode(ascii+n-base);return c;}).join('');}
+function linkHtml(href,text){return '<a href="'+escapeHtml(href)+'" target="_blank" rel="noopener noreferrer">'+text+'</a>';}
+function extract(root,rich=false){
+ let result='';
+ function boundary(){if(result&&!result.endsWith('\n'))result+='\n';}
+ function walk(node){
+  if(node.nodeType===3){const s=getComputedStyle(node.parentElement);let b=s.fontWeight==='bold'||parseInt(s.fontWeight,10)>=600,i=/italic|oblique/.test(s.fontStyle);if(mode.value!=='auto'){b=mode.value==='bold'||mode.value==='bolditalic';i=mode.value==='italic'||mode.value==='bolditalic';}if(rich){let text=escapeHtml(styledText(node.nodeValue,false,false));if(i)text='<em style="font-style:italic">'+text+'</em>';if(b)text='<strong style="font-weight:700">'+text+'</strong>';result+=text;}else result+=styledText(node.nodeValue,b,i);return;}
+  if(node.nodeType!==1)return;
+  const tag=node.tagName,s=getComputedStyle(node);if(['SCRIPT','STYLE','TEMPLATE','NOSCRIPT'].includes(tag)||s.display==='none'||s.visibility==='hidden')return;
+  if(tag==='BR'){result+='\n';return;}
+  const href=tag==='A'?safeHref(node.getAttribute('href')):'';
+  if(href&&node.textContent.trim()===href){result+=rich?linkHtml(href,escapeHtml(href)):href;return;}
+  if(href&&!rich){const label=unstyle(node.innerText||node.textContent).trim();result+=(label.startsWith('@')?'':'@')+label;return;}
+  const block=/^(block|list-item|flex|grid|table|flow-root)/.test(s.display);
+  if(block)boundary();
+  if(tag==='LI'){const parent=node.parentElement;if(parent.tagName==='OL'){let number=Number(parent.getAttribute('start')||1);for(const child of parent.children){if(child.tagName!=='LI')continue;if(child.hasAttribute('value'))number=Number(child.getAttribute('value'));if(child===node)break;number++;}result+=number+'. ';}else result+='🔸 ';}
+  const start=result.length;
+  for(const child of node.childNodes)walk(child);
+  if(href){if(rich)result=result.slice(0,start)+linkHtml(href,result.slice(start));else result+=' ('+href+')';}
+  if(tag==='TD'||tag==='TH')result+='\t';else if(block)boundary();
+ }
+ for(const child of root.childNodes)walk(child);
+ return normalize(result);
 }
-</script>
+const richOutput=document.getElementById('richOutput'),copyRichButton=document.getElementById('copyRichButton');
+function articleParagraphs(html){
+ // Clipboard editors often discard repeated BRs and white-space CSS.
+ // Use actual paragraphs, reopening inline formatting within each paragraph.
+ const source=document.createElement('template');source.innerHTML=html;
+ const container=document.createElement('div');let paragraph=null;
+ function append(text,ancestors){if(!text)return;if(!paragraph){paragraph=document.createElement('p');paragraph.style.margin='0 0 1em';container.append(paragraph);}let parent=paragraph;for(const element of ancestors){const clone=element.cloneNode(false);parent.append(clone);parent=clone;}parent.append(document.createTextNode(text));}
+ function walk(node,ancestors){if(node.nodeType===3){const parts=node.nodeValue.split(/\n+/);parts.forEach((part,index)=>{if(index)paragraph=null;append(part,ancestors);});return;}if(node.nodeType!==1)return;if(node.tagName==='BR'){paragraph=null;return;}for(const child of node.childNodes)walk(child,[...ancestors,node]);}
+ for(const child of source.content.childNodes)walk(child,[]);
+ return container.innerHTML;
+}
+let dirty=true,pasting=false,richHtml='',articlePlain='';
+function invalidate(){dirty=true;copyButton.disabled=true;copyRichButton.disabled=true;status.textContent='Input changed. Click Convert to refresh the output.';}
+function convert(){if(pasting){status.textContent='Finishing the rich-text paste. Please try Convert again in a moment.';return;}let text=extract(input);if(!text.trim()){output.value='';richOutput.textContent='Add some text before converting.';richHtml='';articlePlain='';copyButton.disabled=true;copyRichButton.disabled=true;status.textContent='Add some text before converting.';return;}let html=extract(input,true);if(signature.checked){text+='\n\n'+SIGNATURE;html+='\n\n<strong>Thank you</strong> 🙏 for <strong>your</strong> time and please <strong>Like 👍</strong>, <strong>Share</strong>, and/or <strong>Comment</strong>';}output.value=text;richHtml=articleParagraphs(html);richOutput.innerHTML=richHtml;articlePlain=Array.from(richOutput.children,p=>p.textContent).join('\n\n');dirty=false;copyButton.disabled=false;copyRichButton.disabled=false;document.getElementById('count').textContent=Array.from(text).length.toLocaleString()+' Unicode characters';status.textContent='Converted. Copy for LinkedIn uses Unicode and @ labels; Copy for article uses native formatting, paragraphs and hyperlinks.';}
+input.addEventListener('input',invalidate);mode.addEventListener('change',invalidate);signature.addEventListener('change',invalidate);document.getElementById('convertButton').addEventListener('click',convert);
+document.querySelectorAll('[data-format]').forEach(button=>{button.addEventListener('mousedown',e=>e.preventDefault());button.addEventListener('click',()=>{input.focus();document.execCommand(button.dataset.format,false);invalidate();});});
+// Resolve source CSS inside an inert, isolated document, then retain only
+// text, block/list structure and computed bold/italic. No pasted executable
+// content, external resources or source CSS enters the actual editor.
+input.addEventListener('paste',event=>{
+ const data=event.clipboardData;if(!data)return;event.preventDefault();
+ const html=data.getData('text/html'),plain=data.getData('text/plain');
+ const selection=getSelection();let range=selection.rangeCount?selection.getRangeAt(0).cloneRange():null;
+ if(!range||!input.contains(range.commonAncestorContainer)){range=document.createRange();range.selectNodeContents(input);range.collapse(false);}
+ function insert(fragment){input.focus();range.deleteContents();const last=fragment.lastChild;range.insertNode(fragment);if(last){range.setStartAfter(last);range.collapse(true);selection.removeAllRanges();selection.addRange(range);}invalidate();}
+ function insertPlain(){const fragment=document.createDocumentFragment();fragment.append(document.createTextNode(plain.replace(/\r\n?/g,'\n')));insert(fragment);status.textContent='Pasted plain text. Apply formatting here or select a Force mode.';}
+ if(!html){insertPlain();return;}
+ const frame=document.createElement('iframe');frame.setAttribute('sandbox','allow-same-origin');frame.setAttribute('aria-hidden','true');frame.style.cssText='position:fixed;left:-10000px;width:900px;height:600px;visibility:hidden';
+ const doc=new DOMParser().parseFromString(html,'text/html');doc.querySelectorAll('script,link,meta,base,img,svg,math,iframe,object,embed,video,audio,source').forEach(el=>el.remove());
+ doc.querySelectorAll('*').forEach(el=>{for(const attr of [...el.attributes])if(/^on/i.test(attr.name)||['src','srcset','action'].includes(attr.name)||attr.name==='href'&&(el.tagName!=='A'||!safeHref(attr.value)))el.removeAttribute(attr.name);});
+ pasting=true;copyButton.disabled=true;copyRichButton.disabled=true;status.textContent='Reading pasted formatting…';
+ frame.onload=()=>{try{
+  const source=frame.contentDocument,fragment=document.createDocumentFragment();
+  function clean(node){
+   if(node.nodeType===3){const s=frame.contentWindow.getComputedStyle(node.parentElement),span=document.createElement('span');span.style.fontWeight=s.fontWeight==='bold'||parseInt(s.fontWeight,10)>=600?'700':'400';span.style.fontStyle=/italic|oblique/.test(s.fontStyle)?'italic':'normal';span.textContent=node.nodeValue;return span;}
+   if(node.nodeType!==1||['STYLE','SCRIPT','HEAD','TEMPLATE','NOSCRIPT'].includes(node.tagName))return null;
+   const s=frame.contentWindow.getComputedStyle(node);if(s.display==='none'||s.visibility==='hidden')return null;
+   const tag=node.tagName.toLowerCase();const target=document.createElement(['a','br','ul','ol','li','pre'].includes(tag)?tag:/^(block|flex|grid|table|flow-root)/.test(s.display)?'div':'span');
+   if(tag==='a'){const href=safeHref(node.getAttribute('href'));if(href){target.setAttribute('href',href);target.setAttribute('title',href);}}
+   if(tag==='ol'&&node.hasAttribute('start'))target.setAttribute('start',node.getAttribute('start'));if(tag==='li'&&node.hasAttribute('value'))target.setAttribute('value',node.getAttribute('value'));
+   for(const child of node.childNodes){const item=clean(child);if(item)target.append(item);}return target;
+  }
+  for(const child of source.body.childNodes){const item=clean(child);if(item)fragment.append(item);}insert(fragment);status.textContent='Rich text pasted. Formatting and link destinations retained where provided.';
+ }catch(error){insertPlain();}finally{pasting=false;frame.remove();}};
+ frame.srcdoc='<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;">'+doc.documentElement.outerHTML;document.body.append(frame);
+});
+copyButton.addEventListener('click',async()=>{
+ if(dirty||!output.value){status.textContent='Click Convert before copying.';return;}
+ const text=output.value;
+ try{if(!navigator.clipboard?.writeText)throw new Error('Unavailable');await navigator.clipboard.writeText(text);status.textContent='✓ Copied as plain text — now paste into LinkedIn.';}
+ catch(error){
+  // Override the copy event so the fallback also supplies ONLY text/plain.
+  let copied=false;const handler=e=>{e.preventDefault();if(e.clipboardData){e.clipboardData.clearData();e.clipboardData.setData('text/plain',text);copied=true;}};
+  document.addEventListener('copy',handler);output.focus();output.select();try{document.execCommand('copy');}catch(ignore){}finally{document.removeEventListener('copy',handler);}
+  status.textContent=copied?'✓ Copied as plain text — now paste into LinkedIn.':'Automatic copying is blocked. Output selected: press Ctrl+C (⌘+C on Mac) to copy.';
+ }
+});
+copyRichButton.addEventListener('click',async()=>{
+ if(dirty||!richHtml){status.textContent='Click Convert before copying.';return;}
+ try{
+  if(!navigator.clipboard?.write||typeof ClipboardItem==='undefined')throw new Error('Unavailable');
+  await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([richHtml],{type:'text/html'}),'text/plain':new Blob([articlePlain],{type:'text/plain'})})]);
+  status.textContent='✓ Copied HTML with hyperlinks. Link retention depends on the receiving editor.';
+ }catch(error){
+  let copied=false;const handler=e=>{e.preventDefault();if(e.clipboardData){e.clipboardData.clearData();e.clipboardData.setData('text/html',richHtml);e.clipboardData.setData('text/plain',articlePlain);copied=true;}};
+  const selection=getSelection(),range=document.createRange();range.selectNodeContents(richOutput);selection.removeAllRanges();selection.addRange(range);document.addEventListener('copy',handler);
+  try{document.execCommand('copy');}catch(ignore){}finally{document.removeEventListener('copy',handler);}
+  status.textContent=copied?'✓ Copied HTML with hyperlinks. Link retention depends on the receiving editor.':'Automatic copying is blocked. HTML output selected: press Ctrl+C (⌘+C on Mac).';
+ }
+});
+</script></body></html>
 
-</body>
-</html>
+
