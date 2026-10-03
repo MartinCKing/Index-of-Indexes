@@ -70,7 +70,9 @@ function convertChar(c,bold,italic){
  return c;
 }
 function flowText(text){text=text.replace(/\r\n?|\u2028/g,'\n').replace(/\u2029/g,'\n\n').replace(/\u00a0/g,' ').replace(/[\t ]*\n[\t ]*/g,'\n');if(document.getElementById('joinLines').checked)text=text.replace(/\n(?=[🔸•▪●◦🔴📌]|\d+[.)] )/gu,'\n\n').replace(/([^\n])\n(?!\n)/g,'$1 ');return text;}
-function normalize(text){text=flowText(text);return (document.getElementById('joinLines').checked?text.replace(/\n{3,}/g,'\n\n'):text.replace(/\n+/g,'\n\n')).trimEnd();}
+function isBulletLine(text){return /^\s*(?:🔸|•|▪|●|◦|🔴|\d+[.)]\s)/u.test(text);}
+function topSpacing(text){return text.replace(/^\n+/,'').replace(/^([^\n]*)\n\n/,'$1\n');}
+function normalize(text,rich=false){text=flowText(text);text=(document.getElementById('joinLines').checked?text.replace(/\n{3,}/g,'\n\n'):text.replace(/\n+/g,'\n\n')).trimEnd();const paragraphs=text.split('\n\n');let result='';for(let index=0;index<paragraphs.length;index++){const plain=value=>rich?value.replace(/<[^>]*>/g,''):value;const adjacentBullets=index>0&&isBulletLine(plain(paragraphs[index-1]))&&isBulletLine(plain(paragraphs[index]));result+=(index?(adjacentBullets?'\n':'\n\n'):'')+paragraphs[index];}return result;}
 function safeHref(value){
  if(!value)return '';const raw=value.trim();
  if(/[\s\u0000-\u001f\u007f]/.test(raw))return '';
@@ -103,7 +105,7 @@ function extract(root,rich=false){
   if(tag==='TD'||tag==='TH')result+='\t';else if(block)boundary();
  }
  for(const child of root.childNodes)walk(child);
- return normalize(result);
+ return topSpacing(normalize(result,rich));
 }
 const richOutput=document.getElementById('richOutput'),copyRichButton=document.getElementById('copyRichButton');
 function articleParagraphs(html){
@@ -114,11 +116,12 @@ function articleParagraphs(html){
  function append(text,ancestors){if(!text)return;if(!paragraph){paragraph=document.createElement('p');paragraph.style.margin='0 0 1em';container.append(paragraph);}let parent=paragraph;for(const element of ancestors){const clone=element.cloneNode(false);parent.append(clone);parent=clone;}parent.append(document.createTextNode(text));}
  function walk(node,ancestors){if(node.nodeType===3){const parts=node.nodeValue.split(/\n+/);parts.forEach((part,index)=>{if(index)paragraph=null;append(part,ancestors);});return;}if(node.nodeType!==1)return;if(node.tagName==='BR'){paragraph=null;return;}for(const child of node.childNodes)walk(child,[...ancestors,node]);}
  for(const child of source.content.childNodes)walk(child,[]);
+ const paragraphs=[...container.children];if(paragraphs.length>1)paragraphs[0].style.marginBottom='0';for(let index=1;index<paragraphs.length;index++)if(isBulletLine(paragraphs[index-1].textContent)&&isBulletLine(paragraphs[index].textContent))paragraphs[index-1].style.marginBottom='0';
  return container.innerHTML;
 }
 let dirty=true,pasting=false,richHtml='',articlePlain='';
 function invalidate(){dirty=true;copyButton.disabled=true;copyRichButton.disabled=true;updateCopilotTitle();status.textContent='Input changed. Click Convert to refresh the output.';}
-function convert(){if(pasting){status.textContent='Finishing the rich-text paste. Please try Convert again in a moment.';return;}let text=extract(input);if(!text.trim()){output.value='';richOutput.textContent='Add some text before converting.';richHtml='';articlePlain='';copyButton.disabled=true;copyRichButton.disabled=true;status.textContent='Add some text before converting.';return;}let html=extract(input,true);if(signature.checked){text+='\n\n'+SIGNATURE;html+='\n\n<strong>Thank you</strong> 🙏 for <strong>your</strong> time and please <strong>Like 👍</strong>, <strong>Share</strong>, and/or <strong>Comment</strong>';}output.value=text;richHtml=articleParagraphs(html);richOutput.innerHTML=richHtml;articlePlain=Array.from(richOutput.children,p=>p.textContent).join('\n\n');dirty=false;copyButton.disabled=false;copyRichButton.disabled=false;document.getElementById('count').textContent=Array.from(text).length.toLocaleString()+' Unicode characters';status.textContent='Converted. Copy for LinkedIn uses Unicode and @ labels; Copy for article uses native formatting, paragraphs and hyperlinks.';}
+function convert(){if(pasting){status.textContent='Finishing the rich-text paste. Please try Convert again in a moment.';return;}let text=extract(input);if(!text.trim()){output.value='';richOutput.textContent='Add some text before converting.';richHtml='';articlePlain='';copyButton.disabled=true;copyRichButton.disabled=true;status.textContent='Add some text before converting.';return;}let html=extract(input,true);if(signature.checked){text+='\n\n'+SIGNATURE;html+='\n\n<strong>Thank you</strong> 🙏 for <strong>your</strong> time and please <strong>Like 👍</strong>, <strong>Share</strong>, and/or <strong>Comment</strong>';}output.value=text;richHtml=articleParagraphs(html);richOutput.innerHTML=richHtml;articlePlain=topSpacing(normalize(Array.from(richOutput.children,p=>p.textContent).join('\n\n')));dirty=false;copyButton.disabled=false;copyRichButton.disabled=false;document.getElementById('count').textContent=Array.from(text).length.toLocaleString()+' Unicode characters';status.textContent='Converted. Copy for LinkedIn uses Unicode and @ labels; Copy for article uses native formatting, paragraphs and hyperlinks.';}
 input.addEventListener('input',invalidate);mode.addEventListener('change',invalidate);signature.addEventListener('change',invalidate);document.getElementById('convertButton').addEventListener('click',convert);
 document.getElementById('joinLines').addEventListener('change',invalidate);
 document.querySelectorAll('[data-format]').forEach(button=>{button.addEventListener('mousedown',e=>e.preventDefault());button.addEventListener('click',()=>{input.focus();document.execCommand(button.dataset.format,false);invalidate();});});
@@ -211,6 +214,8 @@ copyRichButton.addEventListener('click',async()=>{
  }
 });
 </script></body></html>
+
+
 
 
 
