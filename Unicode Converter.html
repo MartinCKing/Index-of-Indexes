@@ -46,10 +46,11 @@ h1 .accent{color:#FBBB6A}
 <label for="copilotAgency">Contributor/Agency<input id="copilotAgency" placeholder="Insert your name/agency" required></label>
 <label for="copilotCategory">Category<select id="copilotCategory" style="width:100%"><option>Announcement</option><option>Post</option><option>News</option><option>Regulation</option><option>Guidance</option><option>Standard</option><option>Consultation</option><option>Research</option><option>Event</option></select></label>
 <label class="wide" for="copilotTitle">Title · first sentence of input<input id="copilotTitle" readonly placeholder="Automatically taken from your input"></label></div><p class="help">The search always uses your Contributor/Agency, the selected Category, and the first sentence of the editor input.</p><button type="button" id="copilotButton" class="primary">Create Copilot search link</button></div>
-<div class="options"><div><label for="modeSelect">Output mode</label><select id="modeSelect"><option value="auto">Auto (detect input formatting)</option><option value="normal">Normal</option><option value="bold">Force Bold</option><option value="italic">Force Italic</option><option value="bolditalic">Force Bold+Italic</option></select></div><label class="toggle"><input type="checkbox" id="signature" checked> Add thank-you signature</label></div>
+<div class="options"><div><label for="modeSelect">Output mode</label><select id="modeSelect"><option value="auto">Auto (detect input formatting)</option><option value="normal">Normal</option><option value="bold">Force Bold</option><option value="italic">Force Italic</option><option value="bolditalic">Force Bold+Italic</option></select></div><label class="toggle"><input type="checkbox" id="signature" checked> Add thank-you signature</label><label class="toggle"><input type="checkbox" id="joinLines" checked> Join wrapped lines</label></div>
+<p class="help">Join wrapped lines keeps text flowing inside paragraphs while retaining blank lines and bullet boundaries. Turn it off before pasting text with intentional single line breaks.</p>
 <p class="help">Linked labels become plain “@Name” in the LinkedIn output. Visible URLs stay unchanged. An @ prefix is text: select the matching LinkedIn suggestion to create a mention.</p>
 <details open><summary>Article HTML output · bold, italic and clickable links</summary><div id="richOutput" style="white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #bac8d8;border-radius:10px;padding:16px;margin-top:12px;min-height:80px">Convert your text to preview linked HTML here.</div><p class="help">Copy for article supplies native bold, italic and hyperlinks as HTML. Use normal paste (Ctrl/⌘+V), rather than paste as plain text. The receiving editor may still remove some formatting. Copy for LinkedIn always copies the separate Unicode output above.</p></details>
-<details><summary>Signature and conversion details</summary><p id="signaturePreview"></p><p>Line and paragraph breaks become one blank line, with excessive blank lines removed. Bullets • ▪ ● ◦ and unordered lists become 🔸. Numbered lists retain their numbers. Styles use the original sans-serif Unicode mappings: English letters, plus digits in bold mode. Other characters stay unchanged.</p><p>Formatting detection depends on the HTML supplied by the source application. If a source strips formatting, use the formatting buttons or a Force mode.</p></details>
+<details><summary>Signature and conversion details</summary><p id="signaturePreview"></p><p>Paragraphs are separated by one blank line, with excessive blank lines removed. Wrapped lines are joined when the option above is enabled. Bullets • ▪ ● ◦ and unordered lists become 🔸. Numbered lists retain their numbers. Styles use the original sans-serif Unicode mappings: English letters, plus digits in bold mode. Other characters stay unchanged.</p><p>Formatting detection depends on the HTML supplied by the source application. If a source strips formatting, use the formatting buttons or a Force mode.</p></details>
 <div class="actions"><button type="button" class="primary" id="convertButton">1. Convert</button><button type="button" id="copyButton" disabled>2. Copy for LinkedIn</button><button type="button" id="copyRichButton" disabled>Copy for article (rich HTML)</button></div>
 <p id="status" role="status" aria-live="polite">Paste text above, then click Convert.</p>
 </section><p class="footer">Self-contained · Works offline · Your text stays in this browser</p>
@@ -68,7 +69,8 @@ function convertChar(c,bold,italic){
  if(bold&&!italic&&n>=48&&n<=57)return String.fromCodePoint(0x1d7ec+n-48);
  return c;
 }
-function normalize(text){return text.replace(/\r\n?|\u2028|\u2029/g,'\n').replace(/\u00a0/g,' ').replace(/[\t ]*\n[\t ]*/g,'\n').replace(/\n+/g,'\n\n').trimEnd();}
+function flowText(text){text=text.replace(/\r\n?|\u2028/g,'\n').replace(/\u2029/g,'\n\n').replace(/\u00a0/g,' ').replace(/[\t ]*\n[\t ]*/g,'\n');if(document.getElementById('joinLines').checked)text=text.replace(/\n(?=[🔸•▪●◦🔴📌]|\d+[.)] )/gu,'\n\n').replace(/([^\n])\n(?!\n)/g,'$1 ');return text;}
+function normalize(text){text=flowText(text);return (document.getElementById('joinLines').checked?text.replace(/\n{3,}/g,'\n\n'):text.replace(/\n+/g,'\n\n')).trimEnd();}
 function safeHref(value){
  if(!value)return '';const raw=value.trim();
  if(/[\s\u0000-\u001f\u007f]/.test(raw))return '';
@@ -83,7 +85,7 @@ function unstyle(text){return Array.from(text,c=>{const n=c.codePointAt(0);for(c
 function linkHtml(href,text){return '<a href="'+escapeHtml(href)+'" target="_blank" rel="noopener noreferrer">'+text+'</a>';}
 function extract(root,rich=false){
  let result='';
- function boundary(){if(result&&!result.endsWith('\n'))result+='\n';}
+ function boundary(){if(result&&!result.endsWith('\n\n'))result+=result.endsWith('\n')?'\n':'\n\n';}
  function walk(node){
   if(node.nodeType===3){const s=getComputedStyle(node.parentElement);let b=s.fontWeight==='bold'||parseInt(s.fontWeight,10)>=600,i=/italic|oblique/.test(s.fontStyle);if(mode.value!=='auto'){b=mode.value==='bold'||mode.value==='bolditalic';i=mode.value==='italic'||mode.value==='bolditalic';}if(rich){let text=escapeHtml(styledText(node.nodeValue,false,false));if(i)text='<em style="font-style:italic">'+text+'</em>';if(b)text='<strong style="font-weight:700">'+text+'</strong>';result+=text;}else result+=styledText(node.nodeValue,b,i);return;}
   if(node.nodeType!==1)return;
@@ -118,6 +120,7 @@ let dirty=true,pasting=false,richHtml='',articlePlain='';
 function invalidate(){dirty=true;copyButton.disabled=true;copyRichButton.disabled=true;updateCopilotTitle();status.textContent='Input changed. Click Convert to refresh the output.';}
 function convert(){if(pasting){status.textContent='Finishing the rich-text paste. Please try Convert again in a moment.';return;}let text=extract(input);if(!text.trim()){output.value='';richOutput.textContent='Add some text before converting.';richHtml='';articlePlain='';copyButton.disabled=true;copyRichButton.disabled=true;status.textContent='Add some text before converting.';return;}let html=extract(input,true);if(signature.checked){text+='\n\n'+SIGNATURE;html+='\n\n<strong>Thank you</strong> 🙏 for <strong>your</strong> time and please <strong>Like 👍</strong>, <strong>Share</strong>, and/or <strong>Comment</strong>';}output.value=text;richHtml=articleParagraphs(html);richOutput.innerHTML=richHtml;articlePlain=Array.from(richOutput.children,p=>p.textContent).join('\n\n');dirty=false;copyButton.disabled=false;copyRichButton.disabled=false;document.getElementById('count').textContent=Array.from(text).length.toLocaleString()+' Unicode characters';status.textContent='Converted. Copy for LinkedIn uses Unicode and @ labels; Copy for article uses native formatting, paragraphs and hyperlinks.';}
 input.addEventListener('input',invalidate);mode.addEventListener('change',invalidate);signature.addEventListener('change',invalidate);document.getElementById('convertButton').addEventListener('click',convert);
+document.getElementById('joinLines').addEventListener('change',invalidate);
 document.querySelectorAll('[data-format]').forEach(button=>{button.addEventListener('mousedown',e=>e.preventDefault());button.addEventListener('click',()=>{input.focus();document.execCommand(button.dataset.format,false);invalidate();});});
 let editorBookmark=null;
 document.addEventListener('selectionchange',()=>{const selection=getSelection();if(selection.rangeCount&&input.contains(selection.getRangeAt(0).commonAncestorContainer))editorBookmark=selection.getRangeAt(0).cloneRange();});
@@ -161,7 +164,7 @@ input.addEventListener('paste',event=>{
  const selection=getSelection();let range=selection.rangeCount?selection.getRangeAt(0).cloneRange():null;
  if(!range||!input.contains(range.commonAncestorContainer)){range=document.createRange();range.selectNodeContents(input);range.collapse(false);}
  function insert(fragment){input.focus();range.deleteContents();const last=fragment.lastChild;range.insertNode(fragment);if(last){range.setStartAfter(last);range.collapse(true);selection.removeAllRanges();selection.addRange(range);}invalidate();}
- function insertPlain(){const fragment=document.createDocumentFragment();fragment.append(document.createTextNode(plain.replace(/\r\n?/g,'\n')));insert(fragment);status.textContent='Pasted plain text. Apply formatting here or select a Force mode.';}
+ function insertPlain(){const fragment=document.createDocumentFragment();fragment.append(document.createTextNode(flowText(plain)));insert(fragment);status.textContent='Pasted plain text. Apply formatting here or select a Force mode.';}
  if(!html){insertPlain();return;}
  const frame=document.createElement('iframe');frame.setAttribute('sandbox','allow-same-origin');frame.setAttribute('aria-hidden','true');frame.style.cssText='position:fixed;left:-10000px;width:900px;height:600px;visibility:hidden';
  const doc=new DOMParser().parseFromString(html,'text/html');doc.querySelectorAll('script,link,meta,base,img,svg,math,iframe,object,embed,video,audio,source').forEach(el=>el.remove());
@@ -170,9 +173,10 @@ input.addEventListener('paste',event=>{
  frame.onload=()=>{try{
   const source=frame.contentDocument,fragment=document.createDocumentFragment();
   function clean(node){
-   if(node.nodeType===3){const s=frame.contentWindow.getComputedStyle(node.parentElement),span=document.createElement('span');span.style.fontWeight=s.fontWeight==='bold'||parseInt(s.fontWeight,10)>=600?'700':'400';span.style.fontStyle=/italic|oblique/.test(s.fontStyle)?'italic':'normal';span.textContent=node.nodeValue;return span;}
+   if(node.nodeType===3){const s=frame.contentWindow.getComputedStyle(node.parentElement),span=document.createElement('span');span.style.fontWeight=s.fontWeight==='bold'||parseInt(s.fontWeight,10)>=600?'700':'400';span.style.fontStyle=/italic|oblique/.test(s.fontStyle)?'italic':'normal';span.textContent=['normal','nowrap'].includes(s.whiteSpace)?node.nodeValue.replace(/[\t\r\n ]+/g,' '):flowText(node.nodeValue);return span;}
    if(node.nodeType!==1||['STYLE','SCRIPT','HEAD','TEMPLATE','NOSCRIPT'].includes(node.tagName))return null;
    const s=frame.contentWindow.getComputedStyle(node);if(s.display==='none'||s.visibility==='hidden')return null;
+   if(node.tagName==='BR'&&document.getElementById('joinLines').checked&&node.previousSibling?.nodeName!=='BR'&&node.nextSibling?.nodeName!=='BR'){const span=document.createElement('span');span.textContent=' ';return span;}
    const tag=node.tagName.toLowerCase();const target=document.createElement(['a','br','ul','ol','li','pre'].includes(tag)?tag:/^(block|flex|grid|table|flow-root)/.test(s.display)?'div':'span');
    if(tag==='a'){const href=safeHref(node.getAttribute('href'));if(href){target.setAttribute('href',href);target.setAttribute('title',href);}}
    if(tag==='ol'&&node.hasAttribute('start'))target.setAttribute('start',node.getAttribute('start'));if(tag==='li'&&node.hasAttribute('value'))target.setAttribute('value',node.getAttribute('value'));
